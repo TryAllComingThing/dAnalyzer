@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd\" session-start",
+            "async": false
+          }
+        ],
+        "description": "dAnalyzer: Load usage guide on session start"
+      },
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/learn/hooks/load-instincts\"",
+            "async": false
+          }
+        ],
+        "description": "dAnalyzer Learning: Load instinct index (lightweight)"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'dAnalyzer PreSkillCheck: ⚠️ 所有数据分析 Skills 必须通过 danalyzer-core Agent 调用，禁止直接使用 Skill tool 调用 dAnalyzer 相关 Skills (data-query, data-analysis, visual, dashboard, report, data-clean, funnel-analysis, rfm-analysis 等)。请先调用 danalyzer-core Agent 作为入口。'",
+            "async": false
+          }
+        ],
+        "description": "dAnalyzer: Intercept direct Skill calls and enforce danalyzer-core as mandatory entry point"
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'dAnalyzer: Pre-execution check'"
+          }
+        ],
+        "description": "dAnalyzer pre-execution hook for Bash commands"
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'dAnalyzer: File modification detected'"
+          }
+        ],
+        "description": "dAnalyzer hook for file modifications"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd\" post-skill-check",
+            "async": false,
+            "description": "dAnalyzer: Check if skill output needs security processing"
+          }
+        ],
+        "description": "dAnalyzer: Post-skill security check for output skills"
+      },
+      {
+        "matcher": "Skill|Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/learn/hooks/analyze-observe\"",
+            "async": false
+          },
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/learn/hooks/instinct-apply\"",
+            "async": true,
+            "timeout": 10
+          }
+        ],
+        "description": "dAnalyzer Learning: Record behavior + apply instincts on-demand"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "notification",
+            "message": "dAnalyzer: Tool execution completed",
+            "async": true,
+            "timeout": 5
+          }
+        ],
+        "description": "dAnalyzer post-execution notification"
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd\" session-end",
+            "async": false
+          }
+        ],
+        "description": "dAnalyzer session cleanup hook"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/learn/hooks/session-summary\"",
+            "async": true,
+            "timeout": 30
+          }
+        ],
+        "description": "dAnalyzer Learning: Session summary and trigger pattern detection"
+      }
+    ]
+  },
+  "security_config": {
+    "auto_security": true,
+    "output_skills": ["visual", "dashboard", "report", "result-formatter"],
+    "scan_on_write": true,
+    "block_on_violation": true
+  },
+  "security_rules": {
+    "forbidden_patterns": [
+      "\\d{17}[\\dXx]",
+      "1[3-9]\\d{9}",
+      "\\d{16,19}"
+    ],
+    "masking_rules": {
+      "phone": "(\\d{3})\\d{4}(\\d{4})",
+      "id_card": "(\\d{6})\\d{8}(\\d{4})",
+      "bank_card": "\\d{4}\\s*\\d{4}\\s*\\d{4}\\s*\\d{4}"
+    }
+  },
+  "learning_config": {
+    "enabled": true,
+    "description": "dAnalyzer Learning System Configuration"
+  }
+}

@@ -2,7 +2,7 @@
 name: result-formatter
 description: 结果格式化
 tools: ['Read', 'Grep', 'Write', 'Edit', 'Bash']
-model: sonnet
+color: blue
 ---
 
 # 结果格式化Agent配置

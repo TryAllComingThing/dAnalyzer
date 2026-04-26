@@ -2,7 +2,7 @@
 name: error-handler
 description: 异常处理
 tools: ['Read', 'Grep', 'Write', 'Edit', 'Bash']
-model: sonnet
+color: blue
 ---
 
 # 异常处理Agent配置

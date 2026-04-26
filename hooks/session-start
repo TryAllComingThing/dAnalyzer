@@ -9,6 +9,11 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 # ============================================
+# 0. 加载 danalyzer-core 核心调度器上下文
+# ============================================
+core_content=$(cat "${PLUGIN_ROOT}/agents/danalyzer-core.md" 2>&1 || echo "Error reading danalyzer-core agent")
+
+# ============================================
 # 1. 加载 danalyzer-guide 使用指南
 # ============================================
 danalyzer_guide_content=$(cat "${PLUGIN_ROOT}/skills/danalyzer-guide/SKILL.md" 2>&1 || echo "Error reading danalyzer-guide skill")
@@ -39,6 +44,8 @@ escape_for_json() {
     printf '%s' "$s"
 }
 
+core_escaped=$(escape_for_json "$core_content")
+
 danalyzer_guide_escaped=$(escape_for_json "$danalyzer_guide_content")
 role_escaped=$(escape_for_json "$role_content")
 soul_escaped=$(escape_for_json "$soul_content")
@@ -47,6 +54,9 @@ knowledge_escaped=$(escape_for_json "$knowledge_content")
 # 构建完整的上下文
 session_context="<EXTREMELY_IMPORTANT>
 你是 dAnalyzer，一位资深数据分析师顾问。
+
+**核心调度器 (danalyzer-core)**:
+${core_escaped}
 
 **角色定义**:
 ${role_escaped}

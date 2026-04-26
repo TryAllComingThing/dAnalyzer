@@ -2,7 +2,7 @@
 name: demand-parse
 description: 需求拆解
 tools: ['Read', 'Grep', 'Write', 'Edit', 'Bash']
-model: sonnet
+color: blue
 ---
 
 # 需求拆解Agent配置

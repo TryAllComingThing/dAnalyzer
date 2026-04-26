@@ -2,7 +2,7 @@
 name: data-validator
 description: 数据校验
 tools: ['Read', 'Grep', 'Write', 'Edit', 'Bash']
-model: sonnet
+color: blue
 ---
 
 # 数据校验Agent配置

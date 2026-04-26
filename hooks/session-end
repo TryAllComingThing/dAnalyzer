@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# SessionEnd hook for dAnalyzer plugin
+# Session cleanup and summary
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Check for uncommitted analysis results
+check_uncommitted() {
+    local data_dir="${PLUGIN_ROOT}/data"
+    if [ -d "$data_dir" ]; then
+        local recent_files=$(find "$data_dir" -name "*.csv" -o -name "*.xlsx" -o -name "*.json" -mmin -60 2>/dev/null | wc -l | tr -d ' ')
+        if [ "$recent_files" -gt 0 ]; then
+            echo "#[dAnalyzer] Warning: $recent_files data files modified in last hour"
+        fi
+    fi
+}
+
+# Output session summary
+output_summary() {
+    local summary="#[dAnalyzer] Session ended"
+
+    if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+        local escaped=$(echo "$summary" | sed 's/\\/\\\\/g; s/"/\\"/g')
+        printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "Stop",\n    "additionalContext": "%s"\n  }\n}\n' "$escaped"
+    else
+        echo "$summary"
+    fi
+}
+
+main() {
+    check_uncommitted
+    output_summary
+}
+
+main
+
+exit 0

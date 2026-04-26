@@ -1,0 +1,30 @@
+{
+  "name": "danalyzer",
+  "version": "1.0.0",
+  "description": "数分ECC - 数据分析企业命令中心 | 配置化数据分析自动化平台",
+  "author": {
+    "name": "Data Team",
+    "url": "https://github.com/yourteam/dAnalyzer"
+  },
+  "homepage": "https://github.com/yourteam/dAnalyzer",
+  "repository": "https://github.com/yourteam/dAnalyzer",
+  "license": "MIT",
+  "keywords": [
+    "data-analysis",
+    "analytics"
+  ],
+  "commands": [
+    "./commands/"
+  ],
+  "skills": [
+    "./skills/"
+  ],
+  "agents": [
+    "./agents/danalyzer-core.md",
+    "./agents/data-validator.md",
+    "./agents/demand-parse.md",
+    "./agents/error-handler.md",
+    "./agents/result-formatter.md",
+    "./agents/task-planner.md"
+  ]
+}

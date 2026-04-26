@@ -2,7 +2,7 @@
 name: task-planner
 description: 任务规划
 tools: ['Read', 'Grep', 'Write', 'Edit', 'Bash']
-model: sonnet
+color: blue
 ---
 
 # 任务规划Agent配置
