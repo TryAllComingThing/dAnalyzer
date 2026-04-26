@@ -1,0 +1,11 @@
+# Tool Connector Dependencies
+# Install with: pip install -r requirements.txt
+
+# Required
+pandas>=2.0.0
+
+# Excel support
+openpyxl>=3.1.0
+
+# Optional
+# jsonpath-ng>=1.5.0  # for advanced JSONPath queries

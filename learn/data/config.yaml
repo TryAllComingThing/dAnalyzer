@@ -1,0 +1,54 @@
+# learn/data/config.yaml
+# dAnalyzer 学习系统配置
+
+# 系统配置
+system:
+  # 模式检测配置
+  pattern_detection:
+    # 触发间隔 (分析次数)
+    trigger_interval: 50
+    # 触发时间 (小时)
+    trigger_hours: 1
+
+  # 数据保留策略
+  retention:
+    observations_days: 30  # 观察记录保留30天
+    patterns_days: 90      # 模式保留90天
+
+# 模式检测阈值
+thresholds:
+  # 查询模式
+  query_pattern:
+    min_frequency: 3      # 最小出现次数
+    similarity: 0.8       # 相似度阈值
+
+  # 分析模式
+  analysis_pattern:
+    min_frequency: 5
+    co_occurrence: 0.7    # 共现率
+
+  # 错误模式
+  error_pattern:
+    min_occurrences: 2
+
+  # 行业模式
+  industry_pattern:
+    min_frequency: 3
+
+# Instinct 配置
+instinct:
+  # 最低置信度 (SessionStart 加载)
+  min_confidence_session: 0.8
+
+  # 最低置信度 (智能建议)
+  min_confidence_suggestion: 0.3
+
+# 存储路径
+paths:
+  observations: "learn/data/observations"
+  patterns: "learn/data/patterns"
+  instincts: "learn/data/instincts"
+
+# 版本
+version: "1.3"
+last_updated: "2026-04-25"

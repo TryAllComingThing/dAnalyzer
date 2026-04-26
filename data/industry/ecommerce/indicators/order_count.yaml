@@ -1,0 +1,31 @@
+# 订单数指标
+
+id: ind_002
+code: order_count
+name: 订单数
+type: indicator
+industry: ecommerce
+
+keywords:
+  - 订单
+  - 订单数
+  - order
+
+description: |
+  电商核心指标，表示订单总数量。
+  计算公式: COUNT(order_id)
+
+definition:
+  formula: COUNT(order_id)
+  aggregation: COUNT
+  unit: 单
+  precision: 0
+
+mapping:
+  table: orders
+  field: order_id
+
+stats:
+  access_count: 980
+  importance: 0.90
+  updated: 2026-04-26

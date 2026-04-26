@@ -1,0 +1,51 @@
+# learn/data/patterns/analysis/analysis-patterns.yaml
+# 分析模式 - 固定的指标+维度组合
+
+description: "识别的固定分析套路模式"
+version: "1.0"
+
+# 模式列表 (由 Pattern Detector 自动生成)
+analysis_patterns: []
+
+# 模式生成规则
+generation_rules:
+  min_frequency: 5
+  min_co_occurrence: 0.7
+
+# 索引
+_count: 0
+_last_updated: "2026-04-25"
+
+# 常见分析套路参考
+common_patterns:
+  sales_trend:
+    indicators: ["销售额", "销售量"]
+    dimensions: ["月份", "日期"]
+    description: "销售趋势分析"
+
+  region_comparison:
+    indicators: ["销售额", "占比"]
+    dimensions: ["区域", "省份"]
+    description: "区域对比分析"
+
+  product_ranking:
+    indicators: ["销售额", "排名"]
+    dimensions: ["产品", "类目"]
+    description: "产品排名分析"
+
+  conversion_funnel:
+    indicators: ["访客数", "下单数", "支付数"]
+    dimensions: ["步骤"]
+    description: "转化漏斗分析"
+
+# 示例 (仅供参考，实际由 Pattern Detector 生成)
+# - id: ap-001
+#   type: analysis_pattern
+#   pattern: "销售趋势"
+#   indicators: ["销售额", "销售量"]
+#   dimensions: ["月份"]
+#   frequency: 8
+#   confidence: 0.75
+#   recent_sessions: ["s1", "s2", "s4"]
+#   description: "固定分析套路：销售趋势"
+#   created_at: "2026-04-25"

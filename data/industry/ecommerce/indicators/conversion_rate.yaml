@@ -1,0 +1,32 @@
+# 转化率指标
+
+id: ind_003
+code: conversion_rate
+name: 转化率
+type: indicator
+industry: ecommerce
+
+keywords:
+  - 转化
+  - 转化率
+  - conversion
+  - uv
+
+description: |
+  电商核心指标，表示访客到下单的转化率。
+  计算公式: COUNT(order_id) / COUNT(DISTINCT uv_id)
+
+definition:
+  formula: COUNT(order_id) / COUNT(DISTINCT uv_id)
+  aggregation: AVG
+  unit: "%"
+  precision: 2
+
+mapping:
+  table: orders
+  field: conversion_rate
+
+stats:
+  access_count: 750
+  importance: 0.85
+  updated: 2026-04-26

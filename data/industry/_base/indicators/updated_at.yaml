@@ -1,0 +1,33 @@
+# 通用更新时间指标
+
+id: base_002
+code: updated_at
+name: 更新时间
+type: indicator
+industry: _base
+
+keywords:
+  - 更新时间
+  - 修改时间
+  - updated_at
+  - modified
+
+description: |
+  通用时间字段，记录数据最后更新时间。
+  用于数据同步和增量更新场景。
+
+definition:
+  formula: updated_at
+  aggregation: MAX
+  unit: 时间戳
+  precision: 0
+
+mapping:
+  table: "*"
+  field: updated_at
+  notes: "通配符表示所有表"
+
+stats:
+  access_count: 300
+  importance: 0.7
+  updated: 2026-04-26

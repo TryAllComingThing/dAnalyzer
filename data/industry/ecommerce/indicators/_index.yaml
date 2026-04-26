@@ -1,0 +1,112 @@
+# 电商行业指标索引
+
+> 用于快速检索的索引文件
+
+## 销售指标
+
+```yaml
+category: sales
+total_count: 10
+---
+
+index:
+  - key: sales_amount
+    name: 销售额
+    keywords: [销售额, 销售, 收入, GMV, 营业额]
+    related_tables: [orders]
+
+  - key: order_count
+    name: 订单量
+    keywords: [订单量, 订单数, 订单, 成交量]
+    related_tables: [orders]
+
+  - key: avg_order_value
+    name: 客单价
+    keywords: [客单价, 平均订单金额, 人均消费]
+    related_tables: [orders]
+
+  - key: refund_amount
+    name: 退款金额
+    keywords: [退款, 退款金额, 退货]
+    related_tables: [orders]
+
+  - key: refund_rate
+    name: 退款率
+    keywords: [退款率, 退货率]
+    related_tables: [orders]
+
+# 关键词索引
+keyword_index:
+  销售: [sales_amount, order_count, avg_order_value]
+  订单: [order_count, refund_rate]
+  收入: [sales_amount]
+  客单价: [avg_order_value]
+  退款: [refund_amount, refund_rate]
+```
+
+## 转化指标
+
+```yaml
+category: conversion
+total_count: 6
+---
+
+index:
+  - key: conversion_rate
+    name: 总转化率
+    keywords: [转化率, 转化, 转换率]
+    related_tables: [user_actions]
+
+  - key: cart_rate
+    name: 加购率
+    keywords: [加购率, 加购, 购物车]
+    related_tables: [user_actions]
+
+  - key: order_conversion_rate
+    name: 下单转化率
+    keywords: [下单转化率, 下单, 购买转化]
+    related_tables: [user_actions]
+
+  - key: payment_conversion_rate
+    name: 付款转化率
+    keywords: [付款转化率, 付款, 支付转化]
+    related_tables: [user_actions]
+
+# 关键词索引
+keyword_index:
+  转化: [conversion_rate, cart_rate, order_conversion_rate, payment_conversion_rate]
+  加购: [cart_rate]
+  下单: [order_conversion_rate]
+  付款: [payment_conversion_rate]
+```
+
+## 用户指标
+
+```yaml
+category: user
+total_count: 5
+---
+
+index:
+  - key: new_user_count
+    name: 新增用户
+    keywords: [新增用户, 新用户, 注册用户]
+    related_tables: [users]
+
+  - key: active_user_count
+    name: 活跃用户
+    keywords: [活跃用户, 活跃, DAU]
+    related_tables: [user_actions]
+
+  - key: repeat_purchase_rate
+    name: 复购率
+    keywords: [复购率, 复购, 回头客]
+    related_tables: [orders]
+
+# 关键词索引
+keyword_index:
+  用户: [new_user_count, active_user_count]
+  新增: [new_user_count]
+  活跃: [active_user_count]
+  复购: [repeat_purchase_rate]
+```

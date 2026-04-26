@@ -1,0 +1,33 @@
+# 通用状态指标
+
+id: base_006
+code: status
+name: 状态
+type: indicator
+industry: _base
+
+keywords:
+  - 状态
+  - state
+  - status
+  - 状态码
+
+description: |
+  通用状态字段，用于数据状态统计。
+  支持各类状态枚举值统计。
+
+definition:
+  formula: status
+  aggregation: COUNT + GROUP BY
+  unit: 种
+  precision: 0
+
+mapping:
+  table: "*"
+  field: status
+  notes: "通用状态字段"
+
+stats:
+  access_count: 400
+  importance: 0.7
+  updated: 2026-04-26

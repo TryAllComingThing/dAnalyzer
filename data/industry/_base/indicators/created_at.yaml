@@ -1,0 +1,34 @@
+# 通用时间戳指标
+
+id: base_001
+code: created_at
+name: 创建时间
+type: indicator
+industry: _base
+
+keywords:
+  - 创建时间
+  - 创建日期
+  - 创建
+  - created_at
+  - timestamp
+
+description: |
+  通用时间字段，记录数据创建时间。
+  所有业务表通用的时间戳字段。
+
+definition:
+  formula: created_at
+  aggregation: MIN/MAX
+  unit: 时间戳
+  precision: 0
+
+mapping:
+  table: "*"
+  field: created_at
+  notes: "通配符表示所有表"
+
+stats:
+  access_count: 500
+  importance: 0.8
+  updated: 2026-04-26

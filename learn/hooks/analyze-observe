@@ -1,0 +1,187 @@
+#!/usr/bin/env bash
+# learn/hooks/analyze-observe
+# PostToolUse Hook - 记录分析行为到观察存储
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+LEARN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# 环境变量由 Claude Code 提供
+TOOL_NAME="${CLAUDE_TOOL_NAME:-}"
+TOOL_INPUT="${CLAUDE_TOOL_INPUT:-}"
+TOOL_RESULT="${CLAUDE_TOOL_RESULT:-}"
+SESSION_ID="${CLAUDE_SESSION_ID:-default}"
+
+# 观察存储目录
+OBS_DIR="${LEARN_ROOT}/data/observations/sessions"
+mkdir -p "$OBS_DIR"
+
+# ============================================
+# 观察类型判断
+# ============================================
+
+# 判断观察类型
+get_observation_type() {
+    local tool="$1"
+    local input="$2"
+
+    case "$tool" in
+        Skill)
+            # 解析 Skill 名称
+            local skill_name=$(echo "$input" | grep -oP '(?<=Skill: )\w+' | head -1 || echo "unknown")
+
+            # 根据 Skill 类型判断观察类型
+            case "$skill_name" in
+                data-query|query)
+                    echo "query"
+                    ;;
+                data-analysis|analysis)
+                    echo "analysis"
+                    ;;
+                visual|report)
+                    echo "output"
+                    ;;
+                error-handler)
+                    echo "error"
+                    ;;
+                *)
+                    echo "general"
+                    ;;
+            esac
+            ;;
+        Read)
+            # 检查是否读取数据相关文件
+            if echo "$input" | grep -qi "data\|query\|sql"; then
+                echo "query"
+            else
+                echo "general"
+            fi
+            ;;
+        *)
+            echo "general"
+            ;;
+    esac
+}
+
+# ============================================
+# 数据提取
+# ============================================
+
+# 提取 Skill 名称
+extract_skill_name() {
+    local input="$1"
+    echo "$input" | grep -oP '(?<=Skill: )\w+' | head -1 || echo "unknown"
+}
+
+# 提取自然语言查询
+extract_nl_query() {
+    local input="$1"
+    # 提取 Skill: 后面的内容作为查询
+    echo "$input" | sed 's/Skill: \w\+ *//' | head -c 500
+}
+
+# 提取生成的 SQL (如果有)
+extract_generated_sql() {
+    local result="$1"
+    # 简单提取，假设 SQL 在结果中
+    echo "$result" | grep -oP 'SELECT.*FROM.*' | head -1 | head -c 1000 || echo ""
+}
+
+# 提取分析指标
+extract_indicators() {
+    local input="$1"
+    # 常见的指标关键词
+    echo "$input" | grep -oiE '(销售|转化|增长|点击|访问|用户|订单|收入|成本|利润|毛利|客单)' | sort -u | tr '\n' ',' | sed 's/,$//'
+}
+
+# 提取分析维度
+extract_dimensions() {
+    local input="$1"
+    # 常见的维度关键词
+    echo "$input" | grep -oiE '(时间|区域|省份|城市|产品|类目|渠道|用户|性别|年龄|月份|日期)' | sort -u | tr '\n' ',' | sed 's/,$//'
+}
+
+# ============================================
+# 记录观察
+# ============================================
+
+record_observation() {
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    local obs_type=$(get_observation_type "$TOOL_NAME" "$TOOL_INPUT")
+
+    # 构建观察记录
+    local obs_data=""
+
+    case "$TOOL_NAME" in
+        Skill)
+            local skill_name=$(extract_skill_name "$TOOL_INPUT")
+            local nl_query=$(extract_nl_query "$TOOL_INPUT")
+            local indicators=$(extract_indicators "$TOOL_INPUT")
+            local dimensions=$(extract_dimensions "$TOOL_INPUT")
+            local generated_sql=$(extract_generated_sql "$TOOL_RESULT")
+
+            obs_data=$(cat <<EOF
+{"timestamp":"$timestamp","type":"$obs_type","session":"$SESSION_ID","tool":"$TOOL_NAME","skill":"$skill_name","nl_query":"$nl_query","indicators":"$indicators","dimensions":"$dimensions","sql":"$generated_sql"}
+EOF
+)
+            ;;
+        Read)
+            local file_path=$(echo "$TOOL_INPUT" | grep -oP '(?<="file_path":")[^"]+' | head -1 || echo "unknown")
+            obs_data=$(cat <<EOF
+{"timestamp":"$timestamp","type":"$obs_type","session":"$SESSION_ID","tool":"$TOOL_NAME","file":"$file_path"}
+EOF
+)
+            ;;
+        *)
+            obs_data=$(cat <<EOF
+{"timestamp":"$timestamp","type":"$obs_type","session":"$SESSION_ID","tool":"$TOOL_NAME"}
+EOF
+)
+            ;;
+    esac
+
+    # 写入观察文件
+    local obs_file="${OBS_DIR}/${SESSION_ID}.jsonl"
+    echo "$obs_data" >> "$obs_file"
+
+    # 更新索引
+    update_index
+}
+
+# 更新索引
+update_index() {
+    local index_file="${LEARN_ROOT}/data/observations/index.json"
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    mkdir -p "$(dirname "$index_file")"
+
+    if [ -f "$index_file" ]; then
+        # 检查会话是否已存在
+        if ! grep -q "\"$SESSION_ID\"" "$index_file"; then
+            # 追加新会话
+            local temp_file=$(mktemp)
+            sed "s/\"sessions\":\[/\"sessions\":[\"$SESSION_ID\",/" "$index_file" > "$temp_file" || echo "{\"sessions\":[\"$SESSION_ID\"],\"last_updated\":\"$timestamp\"}" > "$index_file"
+            mv "$temp_file" "$index_file"
+        fi
+        # 更新最后时间
+        sed -i "s/\"last_updated\": \"[^\"]*\"/\"last_updated\": \"$timestamp\"/" "$index_file"
+    else
+        echo "{\"sessions\":[\"$SESSION_ID\"],\"last_updated\":\"$timestamp\"}" > "$index_file"
+    fi
+}
+
+# ============================================
+# 主逻辑
+# ============================================
+
+main() {
+    # 只有 Skill 或 Read 调用才记录
+    if [ "$TOOL_NAME" = "Skill" ] || [ "$TOOL_NAME" = "Read" ]; then
+        record_observation
+    fi
+}
+
+main
+
+exit 0

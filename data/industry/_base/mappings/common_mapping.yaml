@@ -1,0 +1,71 @@
+# 通用字段映射
+
+id: base_map_001
+code: common_mapping
+name: 通用字段映射
+type: mapping
+industry: _base
+
+keywords:
+  - 字段
+  - 映射
+  - mapping
+  - 通用
+  - common
+
+description: |
+  通用字段映射定义。
+  定义跨行业通用的标准字段名称。
+
+mappings:
+  # 时间相关
+  created_at:
+    - created_at
+    - create_time
+    - gmt_create
+    - ctime
+
+  updated_at:
+    - updated_at
+    - update_time
+    - gmt_modified
+    - mtime
+
+  # 用户相关
+  user_id:
+    - user_id
+    - customer_id
+    - member_id
+    - uid
+    - buyer_id
+    - user_no
+
+  # 订单相关
+  order_id:
+    - order_id
+    - order_no
+    - transaction_id
+    - biz_order_id
+    - order_no
+
+  # 金额相关
+  amount:
+    - amount
+    - total_amount
+    - order_amount
+    - pay_amount
+    - money
+    - fee
+
+  # 状态相关
+  status:
+    - status
+    - state
+    - order_status
+    - pay_status
+    - deliver_status
+
+stats:
+  usage_count: 600
+  importance: 0.95
+  updated: 2026-04-26

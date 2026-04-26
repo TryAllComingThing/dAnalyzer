@@ -1,0 +1,48 @@
+# learn/data/patterns/analysis/error-patterns.yaml
+# 错误模式 - 识别的重复错误类型
+
+description: "识别的重复错误类型模式"
+version: "1.0"
+
+# 模式列表 (由 Pattern Detector 自动生成)
+error_patterns: []
+
+# 模式生成规则
+generation_rules:
+  min_occurrences: 2
+  min_confidence: 0.7
+
+# 索引
+_count: 0
+_last_updated: "2026-04-25"
+
+# 已知错误解决方案参考
+known_solutions:
+  division_by_zero:
+    solution: "使用 NULLIF 避免除零"
+    example: "SELECT col / NULLIF(divisor, 0) FROM table"
+
+  field_not_found:
+    solution: "检查字段名是否正确，参考数据字典"
+
+  data_type_mismatch:
+    solution: "使用类型转换函数 CAST() 或 CONVERT()"
+
+# 示例 (仅供参考，实际由 Pattern Detector 生成)
+# - id: ep-001
+#   type: error_pattern
+#   pattern: "除零错误"
+#   occurrences: 3
+#   confidence: 0.9
+#   contexts:
+#     - "毛利率 = 毛利/销售额"
+#     - "转化率 = 订单数/访客数"
+#   solution: "使用 NULLIF 避免除零"
+#   prevention_hint: "检测到除法运算符时自动提示使用 NULLIF"
+#   suggested_instinct:
+#     name: division-safety
+#     trigger:
+#       type: error_context
+#       pattern: "division_by_zero"
+#     action: "检查除数可能为0时，提示使用 NULLIF"
+#   created_at: "2026-04-25"

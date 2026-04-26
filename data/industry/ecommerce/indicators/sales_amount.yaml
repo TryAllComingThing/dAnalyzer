@@ -1,0 +1,32 @@
+# 销售额指标
+
+id: ind_001
+code: sales_amount
+name: 销售额
+type: indicator
+industry: ecommerce
+
+keywords:
+  - 销售
+  - 营收
+  - GMV
+  - revenue
+
+description: |
+  电商核心指标，表示订单实付金额总和。
+  计算公式: SUM(order_amount - refund_amount)
+
+definition:
+  formula: SUM(order_amount - refund_amount)
+  aggregation: SUM
+  unit: 元
+  precision: 2
+
+mapping:
+  table: orders
+  field: order_amount
+
+stats:
+  access_count: 1250
+  importance: 0.95
+  updated: 2026-04-26

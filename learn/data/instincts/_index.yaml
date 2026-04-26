@@ -1,0 +1,31 @@
+# learn/data/instincts/_index.yaml
+# Instinct 索引
+
+description: "轻量级应用规则存储"
+
+structure:
+  recommendation/: "智能推荐"
+    "smart-recommendation.yaml": "通用智能推荐"
+
+  error-learning/: "错误学习"
+    "division-safety.yaml": "除零错误预防"
+
+  auto-discovery/: "自动发现"
+    "industry-indicator.yaml": "行业指标发现"
+
+instinct_types:
+  - recommendation:
+      description: "基于历史模式主动推荐"
+      trigger: "context_match"
+  - error_learning:
+      description: "从历史错误中学习预防"
+      trigger: "error_context"
+  - auto_discovery:
+      description: "自动发现行业特定指标"
+      trigger: "frequency"
+
+confidence_levels:
+  session_load: 0.8   # SessionStart 加载阈值
+  suggestion: 0.3      # 智能建议阈值
+
+last_updated: "2026-04-25"

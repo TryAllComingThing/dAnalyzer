@@ -1,0 +1,36 @@
+# 用户分析场景
+
+id: scn_002
+code: user_analysis
+name: 用户分析
+type: scenario
+industry: ecommerce
+
+keywords:
+  - 用户
+  - 用户分析
+  - 复购
+  - user
+  - rfm
+
+description: |
+  用户相关分析，包含:
+  - 用户画像分析
+  - 复购率分析
+  - RFM 分析
+
+content:
+  required:
+    - order_count
+    - user_count
+  optional:
+    - repeat_purchase_rate
+    - avg_order_value
+  dimensions:
+    用户维度: [新客, 老客, 会员]
+    区域维度: [全国, 区域]
+
+stats:
+  usage_count: 180
+  satisfaction: 0.82
+  updated: 2026-04-26

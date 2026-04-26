@@ -1,0 +1,43 @@
+# learn/data/observations/_index.yaml
+# 观察记录索引
+
+description: "分析行为观察记录存储"
+version: "1.0"
+
+structure:
+  sessions/: "按会话ID组织的观察记录"
+    "{session_id}.jsonl": "单会话观察记录 (JSONL格式)"
+    "{session_id}_summary.json": "会话汇总 (JSON格式)"
+
+index_file: "index.json"
+
+# 观察类型
+observation_types:
+  - query: "查询行为"
+  - analysis: "分析行为"
+  - output: "输出行为"
+  - error: "错误行为"
+  - feedback: "反馈行为"
+
+# 观察数据字段
+observation_fields:
+  - timestamp: "观察时间 (ISO8601)"
+  - type: "观察类型"
+  - session: "会话ID"
+  - tool: "使用的工具"
+  - skill: "调用的Skill (可选)"
+  - nl_query: "自然语言查询 (可选)"
+  - indicators: "使用的指标 (可选)"
+  - dimensions: "分析维度 (可选)"
+  - sql: "生成的SQL (可选)"
+
+# 统计信息
+stats:
+  total_sessions: 0
+  total_observations: 0
+  last_updated: "2026-04-25"
+
+# 数据保留
+retention:
+  max_sessions: 1000
+  max_days: 30

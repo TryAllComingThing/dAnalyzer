@@ -1,0 +1,24 @@
+# 通用默认偏好设置
+
+user: default
+
+preferences:
+  default_industry: _base
+  preferred_dimensions:
+    - 时间
+  default_time_range: 本月
+  preferred_format: table
+
+frequent_queries:
+  - query: 时间趋势
+    count: 10
+  - query: 用户行为
+    count: 8
+
+frequent_scenarios:
+  - code: time_trend
+    count: 5
+  - code: user_behavior
+    count: 3
+
+updated: 2026-04-26

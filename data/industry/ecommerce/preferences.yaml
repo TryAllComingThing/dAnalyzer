@@ -1,0 +1,27 @@
+# 用户偏好设置
+
+user: default
+
+preferences:
+  default_industry: ecommerce
+  preferred_dimensions:
+    - 区域
+    - 类目
+  default_time_range: 本月
+  preferred_format: chart
+
+frequent_queries:
+  - query: 销售额
+    count: 45
+  - query: 订单数
+    count: 32
+  - query: 转化率
+    count: 28
+
+frequent_scenarios:
+  - code: sales_trend
+    count: 18
+  - code: user_analysis
+    count: 12
+
+updated: 2026-04-26

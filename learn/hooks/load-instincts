@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# learn/hooks/load-instincts
+# SessionStart Hook - 轻量级加载，只提供索引信息
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+LEARN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# 加载配置
+load_config() {
+    local config_file="${LEARN_ROOT}/data/config.yaml"
+    if [ -f "$config_file" ]; then
+        echo "#[dAnalyzer Learning] Learning system enabled"
+    fi
+}
+
+# 加载轻量级索引信息
+load_index_info() {
+    local instinct_dir="${LEARN_ROOT}/data/instincts"
+    local index_file="${instinct_dir}/_index.yaml"
+
+    if [ ! -f "$index_file" ]; then
+        echo "#[dAnalyzer Learning] No instinct index found"
+        return
+    fi
+
+    # 只提取索引信息，不加载完整内容
+    local instinct_count=$(find "$instinct_dir" -name "*.yaml" ! -name "_index.yaml" | wc -l | tr -d ' ')
+
+    # 提取索引中的类型信息
+    local types=""
+    if grep -q "instinct_types:" "$index_file"; then
+        types=$(grep -A10 "instinct_types:" "$index_file" | grep -E "^\s+-" | sed 's/.*- //' | tr '\n' ',' | sed 's/,$//')
+    fi
+
+    echo "#[dAnalyzer Learning] Available instinct types: $types"
+    echo "#[dAnalyzer Learning] Total instincts: $instinct_count"
+    echo "#[dAnalyzer Learning] Matching will occur on-demand after skill execution"
+    echo ""
+    echo "# dAnalyzer Learning System - Instinct Index"
+    echo "# To use: Skill results will be enhanced with matched instincts"
+    echo "# Types: $types"
+}
+
+# 输出 (供 SessionStart 注入上下文)
+output_context() {
+    local index_info=$(load_index_info)
+
+    if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+        # JSON 格式输出 (Claude Code 环境)
+        local escaped=$(echo "$index_info" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr '\n' ' ')
+        printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$escaped"
+    else
+        # 直接输出 (调试模式)
+        echo "$index_info"
+    fi
+}
+
+# 主逻辑
+main() {
+    load_config
+    output_context
+}
+
+main
+
+exit 0

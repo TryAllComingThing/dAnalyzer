@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# learn/hooks/instinct-apply
+# 按需匹配 Instinct - 在 Skill 执行后调用
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+LEARN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# 环境变量由 Claude Code 提供
+TOOL_NAME="${CLAUDE_TOOL_NAME:-}"
+TOOL_INPUT="${CLAUDE_TOOL_INPUT:-}"
+TOOL_RESULT="${CLAUDE_TOOL_RESULT:-}"
+
+# 调用 Python Instinct Engine 进行匹配
+call_instinct_engine() {
+    local script_dir="${LEARN_ROOT}/scripts"
+    local python_script="${script_dir}/instinct-engine.py"
+
+    if [ ! -f "$python_script" ]; then
+        return
+    fi
+
+    # 构建上下文
+    local context="{}"
+
+    case "$TOOL_NAME" in
+        Skill)
+            # 提取 Skill 名称
+            local skill_name=$(echo "$TOOL_INPUT" | grep -oP '(?<=Skill: )\w+' | head -1 || echo "")
+            # 提取自然语言查询
+            local nl_query=$(echo "$TOOL_INPUT" | sed 's/Skill: \w\+ *//' | head -c 500)
+
+            context=$(cat <<EOF
+{"skill":"$skill_name","query":"$nl_query","match_strength":1.0}
+EOF
+)
+            ;;
+        Read)
+            local file_path=$(echo "$TOOL_INPUT" | grep -oP '(?<="file_path":")[^"]+' | head -1 || echo "")
+            context=$(cat <<EOF
+{"skill":"read","query":"$file_path","match_strength":0.5}
+EOF
+)
+            ;;
+        *)
+            return
+            ;;
+    esac
+
+    # 调用 Python 脚本获取匹配的建议
+    local suggestions=$(python3 "$python_script" --context "$context" --min-confidence 0.3 2>/dev/null)
+
+    if [ -n "$suggestions" ] && [ "$suggestions" != "[]" ]; then
+        echo "#[dAnalyzer Learning] Matched Instincts:"
+        echo "$suggestions" | python3 -m json.tool 2>/dev/null || echo "$suggestions"
+    fi
+}
+
+# 输出格式
+output_suggestions() {
+    local suggestions="$1"
+
+    if [ -z "$suggestions" ] || [ "$suggestions" = "[]" ]; then
+        return
+    fi
+
+    # 格式化输出
+    echo ""
+    echo "💡 dAnalyzer Learning Suggestions:"
+
+    # 解析 JSON 并输出
+    echo "$suggestions" | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+for item in data:
+    print(f\"  • {item.get('name', 'unknown')}: {item.get('description', '')} (confidence: {item.get('confidence', 0)})\")
+" 2>/dev/null || echo "$suggestions"
+}
+
+# 主逻辑
+main() {
+    # 只处理 Skill 调用
+    if [ "$TOOL_NAME" = "Skill" ]; then
+        call_instinct_engine
+    fi
+}
+
+main
+
+exit 0

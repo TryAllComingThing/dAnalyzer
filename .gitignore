@@ -1,0 +1,22 @@
+# Temporary files
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude Code internal
+.claude/
+.claude-plugin/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.db

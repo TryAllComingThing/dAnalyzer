@@ -1,0 +1,44 @@
+# learn/data/instincts/auto-discovery/industry-indicator.yaml
+---
+name: industry-indicator-discovery
+description: 行业指标自动发现 - 自动识别行业特定指标
+confidence: 0.6
+trigger:
+  type: frequency
+  threshold: 5
+---
+
+# 行业指标自动发现 Instinct
+
+## 触发条件
+
+某指标在行业上下文中频繁出现（≥5次）时触发。
+
+## 应用逻辑
+
+当检测到高频指标时:
+
+1. **提取指标名称和上下文**
+2. **检查是否已在行业配置中**
+3. **若不存在，生成添加建议**
+4. **更新行业指标索引**
+
+## 示例
+
+```
+用户: 在电商场景多次查询 "转化率"
+→ 检测: 电商指标 "转化率" 出现 8 次
+
+建议: 转化率是电商高频指标，建议添加到电商行业配置
+
+操作: 更新 data/industry/ecommerce/indicators.yaml
+```
+
+## 行业指标发现
+
+| 行业 | 常见指标 |
+|------|----------|
+| 电商 | 客单价、转化率、复购率、GMV |
+| 物流 | 配送时效、妥投率、车辆利用率 |
+| 制造 | 产能利用率、良品率、库存周转 |
+| 金融 | 贷款余额、逾期率、坏账率 |

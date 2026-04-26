@@ -1,0 +1,13 @@
+# Datawarehouse Connector Dependencies
+# Install with: pip install -r requirements.txt
+
+# Database drivers
+pymysql>=1.1.0
+clickhouse-driver>=0.2.6
+pyhive[hive]>=0.7.0
+psycopg2-binary>=2.9.9
+cx-Oracle>=8.3.0
+oracledb>=2.0.0
+
+# Optional
+pandas>=2.0.0

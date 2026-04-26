@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Post-skill-check hook for dAnalyzer
+# This hook runs after Skill tool execution to check if security processing is needed
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Load security configuration
+CONFIG_FILE="${PLUGIN_ROOT}/.claude-plugin/hooks.json"
+
+# Output skills that require security check
+OUTPUT_SKILLS="visual dashboard report result-formatter"
+
+echo "dAnalyzer: Post-skill check triggered"
+
+# Note: This hook provides the mechanism, but the actual security
+# integration should be done in danalyzer-core for full skill invocation.
+# See danalyzer-core.md for the security integration pattern.
+
+exit 0

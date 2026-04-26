@@ -1,0 +1,34 @@
+# learn/data/patterns/analysis/query-patterns.yaml
+# 查询模式 - 识别的重复查询意图
+
+description: "识别的重复查询意图模式"
+version: "1.0"
+
+# 模式列表 (由 Pattern Detector 自动生成)
+query_patterns: []
+
+# 模式生成规则
+generation_rules:
+  min_frequency: 3
+  min_confidence: 0.6
+
+# 索引
+_count: 0
+_last_updated: "2026-04-25"
+
+# 示例 (仅供参考，实际由 Pattern Detector 生成)
+# - id: qp-001
+#   type: query_pattern
+#   pattern: "销售.*查询"
+#   frequency: 12
+#   confidence: 0.85
+#   recent_sessions: ["s1", "s3", "s5"]
+#   suggested_insight: "销售查询是高频需求 (12次)，建议预置销售仪表盘"
+#   suggested_instinct:
+#     name: sales-query-helper
+#     trigger:
+#       type: context_match
+#       pattern: "销售"
+#     action: "提供销售相关指标快捷选项"
+#   created_at: "2026-04-25"
+#   updated_at: "2026-04-25"

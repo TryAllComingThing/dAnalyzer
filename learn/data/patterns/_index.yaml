@@ -1,0 +1,58 @@
+# learn/data/patterns/_index.yaml
+# 模式索引
+
+description: "识别的分析模式存储"
+version: "1.0"
+
+structure:
+  industry/: "行业模式"
+    "ecommerce.yaml": "电商行业模式"
+    "logistics.yaml": "物流行业模式"
+    "manufacturing.yaml": "制造行业模式"
+    "finance.yaml": "金融行业模式"
+
+  analysis/: "分析模式"
+    "query-patterns.yaml": "查询模式"
+    "error-patterns.yaml": "错误模式"
+    "analysis-patterns.yaml": "分析模式"
+
+# 模式类型定义
+pattern_types:
+  - query_pattern:
+      description: "重复的查询意图"
+      detection:
+        threshold: 3
+        similarity: 0.8
+
+  - analysis_pattern:
+      description: "常用的分析套路"
+      detection:
+        threshold: 5
+        co_occurrence: 0.7
+
+  - error_pattern:
+      description: "重复的错误类型"
+      detection:
+        threshold: 2
+
+  - industry_pattern:
+      description: "行业特定指标发现"
+      detection:
+        frequency: 3
+
+# 模式数据字段
+pattern_fields:
+  - id: "模式ID"
+  - type: "模式类型"
+  - pattern: "模式内容"
+  - frequency: "出现频率"
+  - confidence: "置信度"
+  - recent_sessions: "相关会话"
+  - suggested_insight: "建议洞察"
+  - suggested_instinct: "建议Instinct"
+
+# 生成规则
+generation_rules:
+  min_confidence: 0.6
+
+last_updated: "2026-04-25"
