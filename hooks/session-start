@@ -11,12 +11,12 @@ PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 # ============================================
 # 0. 加载 danalyzer-core 核心调度器上下文
 # ============================================
-core_content=$(cat "${PLUGIN_ROOT}/agents/danalyzer-core.md" 2>&1 || echo "Error reading danalyzer-core agent")
+core_content=$(cat "${PLUGIN_ROOT}/agents/use-danalyzer.md" 2>&1 || echo "Error reading use-danalyzer agent")
 
 # ============================================
 # 1. 加载 danalyzer-guide 使用指南
 # ============================================
-danalyzer_guide_content=$(cat "${PLUGIN_ROOT}/skills/danalyzer-guide/SKILL.md" 2>&1 || echo "Error reading danalyzer-guide skill")
+#danalyzer_guide_content=$(cat "${PLUGIN_ROOT}/skills/danalyzer-guide/SKILL.md" 2>&1 || echo "Error reading danalyzer-guide skill")
 
 # ============================================
 # 2. 加载角色定义 (Role)

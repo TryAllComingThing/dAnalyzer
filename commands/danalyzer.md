@@ -32,11 +32,12 @@ trigger: danalyzer
                     ┌──────────┼──────────┐
                     ▼          ▼          ▼
               需求理解    技能决策    按需加载
+              (内嵌)      (内嵌)      (内嵌)
                     │          │          │
                     ▼          ▼          ▼
-              demand-parse  data-query  security
-              task-planner  data-analysis  result-formatter
-                            dashboard
+              需求拆解     data-query  security
+              任务规划     data-analysis  
+              (内嵌)       dashboard
 ```
 
 ## 为什么需要统一入口
@@ -44,8 +45,8 @@ trigger: danalyzer
 | 问题 | 原因 | 解决 |
 |------|------|------|
 | 直接使用 `/danalyzer:data-analysis` 会跳过编排 | Skill 直接加载到上下文，绕过了 danalyzer-core | 统一通过 `/danalyzer` 入口 |
-| 缺少需求拆解环节 | 没有经过 demand-parse 确认模糊需求 | danalyzer-core 按需调用 demand-parse |
-| 缺少任务规划环节 | 没有经过 task-planner 制定执行计划 | danalyzer-core 按需调用 task-planner |
+| 缺少需求拆解环节 | 没有经过需求拆解确认模糊需求 | danalyzer-core 内嵌需求拆解 |
+| 缺少任务规划环节 | 没有经过任务规划制定执行计划 | danalyzer-core 内嵌任务规划 |
 | 缺少安全校验环节 | 输出没有经过 security 脱敏 | danalyzer-core 默认嵌入 security |
 | 缺少行业上下文 | 没有调用 context-retriever 检索行业指标 | danalyzer-core 按需检索 |
 

@@ -21,10 +21,6 @@
   ],
   "agents": [
     "./agents/danalyzer-core.md",
-    "./agents/data-validator.md",
-    "./agents/demand-parse.md",
-    "./agents/error-handler.md",
-    "./agents/result-formatter.md",
-    "./agents/task-planner.md"
+    "./agents/error-handler.md"
   ]
 }

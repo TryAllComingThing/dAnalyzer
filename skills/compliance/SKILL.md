@@ -186,7 +186,7 @@ def mask_sensitive(data: dict, rules: dict) -> dict:
 |------|----------|
 | data-query | 检查查询权限 |
 | security | 执行脱敏操作 |
-| data-validator | 验证脱敏效果 |
+| data-quality-check | 验证脱敏效果 |
 
 ## 注意事项
 

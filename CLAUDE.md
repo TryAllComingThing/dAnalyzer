@@ -1,8 +1,29 @@
 # dAnalyzer 核心规范
 
-> 版本: 3.6 (2026-04-26)
+> 版本: 3.7 (2026-04-27)
 > 说明: Claude Code 数据分析 Agent 系统
 > 设计理念: 按需加载 + 自主决策 + 行业适配 + 智能学习
+
+---
+
+## 0. 路由指令（SessionStart 注入 · 最高优先级）
+
+> 完整定义见 [use-danalyzer.md](use-danalyzer.md)
+> 本节的唯一目的：**在 SessionStart 时将此路由规则注入上下文**
+
+**当用户请求涉及以下任何信号时，MUST spawn `Agent: danalyzer-core`，禁止直接调用 Skill：**
+
+- 数据查询/分析/建模/报表/可视化意图
+- 关键词：分析、趋势、对比、归因、漏斗、留存、RFM、聚类、预测、日报、周报、看板、画图、图表、SQL、导出
+- 数据源提及：数据库、ClickHouse、Hive、MySQL
+
+**排除：** 纯代码问题、Git 操作、文件管理、系统运维
+
+```
+用户请求 → 命中检测？→ Agent: danalyzer-core → 需求拆解/任务规划(内嵌) → Skills → 结果
+              │
+              └── 不确定？→ 宁可多路由，不可漏路由 → 走 danalyzer-core
+```
 
 ---
 
@@ -31,12 +52,8 @@
 
 | Agent | 用途 |
 |-------|------|
-| danalyzer-core.md | ⭐ 核心调度器，唯一执行入口 |
-| demand-parse.md | 需求拆解 |
-| task-planner.md | 任务规划 |
-| data-validator.md | 数据校验 |
-| error-handler.md | 错误处理 |
-| result-formatter.md | 结果格式化 |
+| danalyzer-core.md | ⭐ 核心调度器，唯一执行入口，内嵌需求拆解/任务规划 |
+| error-handler.md | 错误处理（唯一 spawn Agent） |
 | template/ | 报告模板 (5个) |
 
 ### 1.3.2 技能（skills）调用规范
@@ -143,27 +160,27 @@
     ▼
 ┌──────────────────────────────────┐
 │     danalyzer-core Agent         │
-│  (数据分析核心 Agent)             │
+│  (唯一入口 · 全部内嵌)            │
 └──────────────┬───────────────────┘
                │
    ┌───────────┼───────────┐
    │           │           │
    ▼           ▼           ▼
-理解意图   技能决策   按需加载
+理解意图   需求拆解   任务规划
+(内嵌)    (if模糊)   (if复杂)
    │           │           │
-   │           │           └─→ Read: skills/xxx/SKILL.md
-   │           │
-   │           └─→ 根据需求选择技能组合
-   │               (可跳过不需要的)
-   │
-   └─→ 解析用户需求:
-       - 数据源
-       - 分析目标
-       - 输出格式
-       - 特殊要求
+   │           └───────────┘
+   │               │
+   ▼               ▼
+技能决策       按需加载
+   │           └─→ Read: skills/xxx/SKILL.md
+   └─→ 根据需求选择技能组合
+       (可跳过不需要的)
                │
                ▼
           执行技能
+               │
+           发生异常? → error-handler (唯一 spawn)
                │
                ▼
           返回结果
@@ -203,13 +220,9 @@
 ```
 dAnalyzer/
 ├── AGENTS.md               # Agent 说明文档
-├── agents/                 # 智能体配置 (6个 + 模板)
-│   ├── danalyzer-core.md   # ⭐ 核心调度器
-│   ├── demand-parse.md     # 需求拆解
-│   ├── task-planner.md     # 任务规划
-│   ├── data-validator.md   # 数据校验
-│   ├── error-handler.md    # 错误处理
-│   ├── result-formatter.md # 结果格式化
+├── agents/                 # 智能体配置 (2个 + 模板)
+│   ├── danalyzer-core.md   # ⭐ 核心调度器 (内嵌所有能力)
+│   ├── error-handler.md    # 错误处理 (唯一 spawn)
 │   └── template/           # 报告模板 (5个)
 ├── skills/                 # 技能 (17个)
 ├── rules/                  # 规则 (4级)

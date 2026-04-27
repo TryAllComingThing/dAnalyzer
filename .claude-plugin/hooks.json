@@ -129,7 +129,7 @@
   },
   "security_config": {
     "auto_security": true,
-    "output_skills": ["visual", "dashboard", "report", "result-formatter"],
+    "output_skills": ["visual", "dashboard", "report"],
     "scan_on_write": true,
     "block_on_violation": true
   },

@@ -18,18 +18,16 @@
 
 | Agent | 目的 | 使用场景 |
 |-------|------|----------|
-| danalyzer-core | 数据分析核心，按需决策 | 用户请求首先到达这里，负责整体调度 |
-| demand-parse | 需求拆解 | 模糊业务需求转化为可执行任务 |
-| task-planner | 任务规划 | 制定详细执行计划 |
-| data-validator | 数据校验 | 确保数据有效性 |
-| error-handler | 错误处理 | 异常捕获与恢复 |
-| result-formatter | 结果格式化 | 输出标准化 |
+| danalyzer-core | 数据分析核心，按需决策 | 唯一入口，内嵌需求拆解+任务规划+结果格式化 |
+| error-handler | 错误处理 | 异常捕获与恢复（唯一 spawn Agent） |
+
+> demand-parse、task-planner、data-validator、result-formatter 已合并为 danalyzer-core 内嵌能力。
 
 ---
 
 ## Agent 编排
 
-danalyzer-core 是**唯一执行入口**，用户请求首先到达这里：
+danalyzer-core 是**唯一执行入口**，所有能力内嵌：
 
 ```
 用户输入
@@ -38,28 +36,22 @@ danalyzer-core 是**唯一执行入口**，用户请求首先到达这里：
 danalyzer-core (核心调度)
     │
     ├── 需求理解 (内嵌)
-    ├── 需求模糊? → demand-parse (条件调用)
-    ├── 任务复杂? → task-planner (条件调用)
+    ├── 需求模糊? → 需求拆解 (内嵌)
+    ├── 任务复杂? → 任务规划 (内嵌)
     ├── 技能决策 (内嵌)
-    └── 按需加载 & 执行 Skills
+    ├── 按需加载 & 执行 Skills
+    └── 发生异常? → error-handler (唯一 spawn)
 ```
 
 **条件触发规则**:
 
-| 条件 | 调用的 Agent |
-|------|--------------|
-| 需求模糊/不明确 | demand-parse |
-| 任务复杂 (>2技能) | task-planner |
-| 需要数据校验 | data-validator |
-| 发生异常 | error-handler |
-| 需要标准化输出 | result-formatter |
-
-**按需调用**：
-- 需要拆解需求 → 调用 demand-parse
-- 需要规划任务 → 调用 task-planner
-- 需要校验数据 → 调用 data-validator
-- 需要处理错误 → 调用 error-handler
-- 需要格式化结果 → 调用 result-formatter
+| 条件 | 处理方式 |
+|------|----------|
+| 需求模糊/不明确 | 内嵌需求拆解 |
+| 任务复杂 (>2技能) | 内嵌任务规划 |
+| 需要数据校验 | 内嵌校验 (或调用 data-quality-check Skill) |
+| 发生异常 | spawn error-handler Agent |
+| 需要标准化输出 | 内嵌格式化 |
 
 ---
 
@@ -87,7 +79,7 @@ danalyzer-core 根据用户需求自主决定技能组合：
 |----------|----------|
 | 销售周报 | data-query → data-clean → data-analysis → visual → report |
 | 用户RFM | data-query → model (rfm) → visual |
-| 合规导出 | data-query → security → result-formatter |
+| 合规导出 | data-query → security → 输出 |
 | 简单查询 | data-query → visual |
 | 漏斗分析 | model (funnel) → data-query → visual |
 | 归因分析 | data-query → model (attribution) → visual |
@@ -116,7 +108,7 @@ danalyzer-core 根据用户需求自主决定技能组合：
 
 ```
 分析后输出流程:
-  data-query → data-analysis → (清洗) → visual/report/dashboard → security → result-formatter
+  data-query → data-analysis → (清洗) → visual/report/dashboard → security → 输出
                                                                           ↑
                                                             脱敏 + 合规检查 (默认嵌入)
 ```
@@ -141,8 +133,8 @@ danalyzer-core 根据用户需求自主决定技能组合：
 ## 项目结构
 
 ```
-agents/          — 6个 Agent + 5个模板
-skills/          — 15个技能 (65+个文件)
+agents/          — 2个 Agent (danalyzer-core + error-handler)
+skills/          — 17个技能
 rules/           — 19个规则 (4级)
 checks/          — 15个校验钩子
 connectors/      — 9个连接器
