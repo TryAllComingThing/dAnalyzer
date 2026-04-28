@@ -77,6 +77,7 @@ class JSONConnector(BaseFileConnector):
                 output_path=file_path,
                 row_count=row_count,
                 columns=columns,
+                raw_data=data,
             )
 
         except Exception as e:

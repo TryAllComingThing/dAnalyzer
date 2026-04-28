@@ -22,8 +22,8 @@
 | 分析意图 | "分析"、"趋势"、"对比"、"归因"、"漏斗"、"留存" |
 | 建模意图 | "RFM"、"聚类"、"分群"、"预测"、"评分" |
 | 报表意图 | "日报"、"周报"、"月报"、"看板"、"dashboard" |
-| 可视化意图 | "画图"、"图表"、"可视化"、"趋势图"、 "饼状图"等图表|
-| 数据源提及 | "数据库"、"ClickHouse"、"Hive"、"excel"、"csv"、"MySQL" 等数据库|
+| 可视化意图 | "画图"、"图表"、"可视化"、"趋势图"、"饼状图"等图表 |
+| 数据源提及 | "数据库"、"ClickHouse"、"Hive"、"excel"、"csv"、"MySQL"等数据库 |
 
 **排除条件**（不触发路由）:
 - 纯代码/编程问题
@@ -32,62 +32,47 @@
 
 ---
 
-## 路由规则（按复杂度分流）
+## 路由规则
+
+**所有命中检测规则的请求，无论简单还是复杂，统一路由到 danalyzer-core**：
 
 ```
 用户请求
     │
     ▼
-评估: 是否命中检测规则？
+命中检测规则？
     │
-    ├── 是 → 判断复杂度
-    │       │
-    │       ├── 简单查询（单次取数，无组合）
-    │       │   特征: "查询X"、"统计X"、"X是多少"、"计算X"
-    │       │   路由: 直接 Skill (danalyzer:query:nl / danalyzer:data-query)
-    │       │   约束: 结果需过 security
-    │       │   开销: 零 Agent spawn
-    │       │
-    │       ├── 取数+展示（2个Skill组合）
-    │       │   特征: "查询X并画图"、"导出X"
-    │       │   路由: Skill 组合 (data-query → visual/export → security)
-    │       │   开销: 无需 Agent
-    │       │
-    │       └── 分析/建模/报表（多Skill编排）
-    │           特征: "分析"、"RFM"、"周报"、"看板"、"趋势"、"漏斗"
-    │           路由: ⚠️ MANDATORY Agent: danalyzer:danalyzer-core
-    │           原因: 需要需求拆解 + 任务规划 + 多Skill编排
-    │           │
-    │           └── danalyzer-core 内部:
-    │                 ├── 需求理解 (内嵌)
-    │                 ├── 需求拆解 (if 模糊 · 内嵌)
-    │                 ├── 任务规划 (if 复杂 · 内嵌)
-    │                 └── 按需加载 Skills → 执行
-    │                      └── 异常? → error-handler (唯一 spawn)
+    ├── 是 → Skill: danalyzer-core（主会话内运行）
+    │         danalyzer-core 内部自主决定:
+    │           - 需求理解 → 需求拆解（if 模糊）→ 任务规划（if 复杂）
+    │           - 技能决策 → 按需加载 Skills → 执行
+    │           - 异常 → spawn error-handler
     │
     └── 否 → 正常处理
 ```
 
-## 复杂度判定速查
-
-| 请求示例 | 判定 | 路由 |
-|----------|------|------|
-| "查询订单数量" | 简单查询 | `Skill: danalyzer:query:nl` |
-| "上月GMV是多少" | 简单查询 | `Skill: danalyzer:data-query` |
-| "统计各渠道用户数" | 简单查询 | `Skill: danalyzer:query:nl` |
-| "查询销售趋势并画图" | 取数+展示 | data-query → visual |
-| "导出用户数据为CSV" | 取数+展示 | data-query → export |
-| "分析上个月销售趋势" | 分析 | `Agent: danalyzer:danalyzer-core` |
-| "RFM用户分层" | 建模 | `Agent: danalyzer:danalyzer-core` |
-| "生成Q1月报" | 报表 | `Agent: danalyzer:danalyzer-core` |
-| "销售看板" | 看板 | `Agent: danalyzer:danalyzer-core` |
-| "漏斗分析" | 分析 | `Agent: danalyzer:danalyzer-core` |
-
 **不确定时**: 走 danalyzer-core（宁可多路由，不可漏路由）
 
-## 关键约束
+---
 
-1. **简单查询直接走 Skill** — 不 spawn Agent，零开销
-2. **多 Skill 编排必须走 danalyzer-core** — 需要拆解+规划+编排
-3. **不确定时走 danalyzer-core** — 宁可多路由，不可漏路由
-4. **用户透明** — 路由过程对用户无感
+## ⚠️ 执行纪律（最高优先级）
+
+### 核心规则：必须 Read SKILL.md，Skill 规则优先于通用知识
+
+```
+❌ 错误: 不读 SKILL.md，直接用通用知识生成 SQL 和 HTML
+✅ 正确: Read skills/model/SKILL.md → Read skills/model/rfm-model.md → 按 Skill 定义的规则执行
+```
+
+### 禁止行为清单
+
+- [ ] 不加载 SKILL.md 直接用通用知识执行分析
+- [ ] 用自己知道的评分标准替代 Skill 文件中定义的标准
+- [ ] 跳过子技能加载（如 rfm-model.md, funnel-model.md）
+- [ ] 用通用知识替代 Skill 文件中定义的规则/标准
+
+### 自检问题
+
+> "这个需求是否有对应的 Skill 文件？"
+>   如果有 → 必须 Read 对应的 SKILL.md，按其中定义的规则执行
+>   如果不确定 → 查 skills/ 目录

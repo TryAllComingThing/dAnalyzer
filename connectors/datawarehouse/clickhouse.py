@@ -44,8 +44,8 @@ class ClickHouseConnector(BaseConnector):
         start_time = time.time()
 
         try:
-            # ClickHouse使用 settings 传递参数
-            settings = {}
+            timeout_sec = max(1, self.default_timeout // 1000)
+            settings = {'max_execution_time': timeout_sec}
             if params:
                 settings['parameters'] = params
 

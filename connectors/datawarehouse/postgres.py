@@ -43,6 +43,8 @@ class PostgreSQLConnector(BaseConnector):
 
         cursor = self._connection.cursor()
         try:
+            timeout_ms = int(self.default_timeout)
+            cursor.execute(f"SET statement_timeout = {timeout_ms}")
             cursor.execute(sql, params or {})
 
             # 获取列名

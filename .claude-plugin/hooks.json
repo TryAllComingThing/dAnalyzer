@@ -11,7 +11,7 @@
             "async": false
           }
         ],
-        "description": "dAnalyzer: Load usage guide on session start"
+        "description": "dAnalyzer: Inject routing rules"
       },
       {
         "matcher": "startup",
@@ -22,40 +22,7 @@
             "async": false
           }
         ],
-        "description": "dAnalyzer Learning: Load instinct index (lightweight)"
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Skill",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'dAnalyzer PreSkillCheck: ⚠️ 所有数据分析 Skills 必须通过 danalyzer-core Agent 调用，禁止直接使用 Skill tool 调用 dAnalyzer 相关 Skills (data-query, data-analysis, visual, dashboard, report, data-clean, funnel-analysis, rfm-analysis 等)。请先调用 danalyzer-core Agent 作为入口。'",
-            "async": false
-          }
-        ],
-        "description": "dAnalyzer: Intercept direct Skill calls and enforce danalyzer-core as mandatory entry point"
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'dAnalyzer: Pre-execution check'"
-          }
-        ],
-        "description": "dAnalyzer pre-execution hook for Bash commands"
-      },
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'dAnalyzer: File modification detected'"
-          }
-        ],
-        "description": "dAnalyzer hook for file modifications"
+        "description": "dAnalyzer: Load instinct index (lightweight)"
       }
     ],
     "PostToolUse": [
@@ -65,11 +32,10 @@
           {
             "type": "command",
             "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd\" post-skill-check",
-            "async": false,
-            "description": "dAnalyzer: Check if skill output needs security processing"
+            "async": false
           }
         ],
-        "description": "dAnalyzer: Post-skill security check for output skills"
+        "description": "dAnalyzer: Trigger security check after skill execution"
       },
       {
         "matcher": "Skill|Read",
@@ -86,19 +52,7 @@
             "timeout": 10
           }
         ],
-        "description": "dAnalyzer Learning: Record behavior + apply instincts on-demand"
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "notification",
-            "message": "dAnalyzer: Tool execution completed",
-            "async": true,
-            "timeout": 5
-          }
-        ],
-        "description": "dAnalyzer post-execution notification"
+        "description": "dAnalyzer: Record observations and apply instincts on demand"
       }
     ],
     "Stop": [
@@ -111,7 +65,7 @@
             "async": false
           }
         ],
-        "description": "dAnalyzer session cleanup hook"
+        "description": "dAnalyzer: Session cleanup"
       },
       {
         "matcher": "*",
@@ -123,7 +77,7 @@
             "timeout": 30
           }
         ],
-        "description": "dAnalyzer Learning: Session summary and trigger pattern detection"
+        "description": "dAnalyzer: Session summary and pattern detection"
       }
     ]
   },

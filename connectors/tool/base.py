@@ -23,6 +23,7 @@ class FileResult:
     output_path: Optional[str] = None
     row_count: int = 0
     columns: List[str] = None
+    raw_data: Any = None
     error: Optional[str] = None
 
     def __post_init__(self):
@@ -83,6 +84,9 @@ def create_tool_connector(connector_type: str, config: Dict[str, Any] = None):
     if connector_type not in connector_map:
         raise ValueError(f"Unknown connector type: {connector_type}")
 
-    module = __import__(f'.{connector_type}_connector', fromlist=[connector_map[connector_type]])
+    module = __import__(
+        f'connectors.tool.{connector_type}_connector',
+        fromlist=[connector_map[connector_type]]
+    )
     connector_class = getattr(module, connector_map[connector_type])
     return connector_class(config)

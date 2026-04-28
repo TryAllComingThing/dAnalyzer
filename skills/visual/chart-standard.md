@@ -108,5 +108,5 @@
 
 ## 依赖资产
 
-- assets/template/chart-config-template.md
-- assets/model/funnel-model.md
+- data/template/report-template.md — 报告模板
+- skills/model/funnel-model.md — 漏斗模型（用于漏斗图配置）

@@ -128,16 +128,66 @@ description: 多数据源数据查询技能，支持自然语言转SQL、Hive、
 - 单次查询超时: 30秒
 ```
 
-### Step 3: 执行SQL
+### Step 3: 执行SQL / 读取数据
+
+**⚠️ 强制使用 Connector，禁止用标准库裸读**。
 
 ```
-根据 data_source 调用对应连接器:
-- hive → hive-connector
-- clickhouse → clickhouse-connector
-- mysql → mysql-connector
-- excel → excel-connector
-- csv → csv-connector
+MUST:  from connectors.tool.csv_connector import CSVConnector
+MUST:  from connectors.tool.json_connector import JSONConnector
+MUST:  from connectors.tool.excel_connector import ExcelConnector
+NEVER: import csv / json.load / open() 裸读数据文件
 ```
+
+#### CSV 数据源
+
+```python
+import sys; sys.path.insert(0, '.')
+from connectors.tool.csv_connector import CSVConnector
+
+c = CSVConnector()
+result = c.read('data/file.csv')
+# result.row_count, result.columns 可用
+```
+
+#### JSON 数据源
+
+```python
+from connectors.tool.json_connector import JSONConnector
+
+c = JSONConnector()
+result = c.read('data/file.json')
+data = result.raw_data  # list[dict]
+```
+
+#### Excel 数据源
+
+```python
+from connectors.tool.excel_connector import ExcelConnector
+
+c = ExcelConnector()
+result = c.read('data/file.xlsx')
+# result.raw_data 可用
+```
+
+#### 数据库数据源 (MySQL/ClickHouse/Hive/PG/Oracle)
+
+```python
+# MySQL
+from connectors.datawarehouse.mysql import MySQLConnector
+conn = MySQLConnector({"host": "...", "database": "...", "user": "...", "password": "..."})
+result = conn.execute("SELECT ...")
+
+# ClickHouse
+from connectors.datawarehouse.clickhouse import ClickHouseConnector
+conn = ClickHouseConnector({"host": "...", "database": "..."})
+result = conn.execute("SELECT ...")
+```
+
+**违规检测**:
+- [ ] 是否用了 `import csv` 而不是 `CSVConnector`？
+- [ ] 是否用了 `json.load(open(...))` 而不是 `JSONConnector`？
+- [ ] 是否用了 `open().read()` 手动解析而不是用 Connector？
 
 ### Step 4: 结果转换
 
@@ -160,7 +210,7 @@ description: 多数据源数据查询技能，支持自然语言转SQL、Hive、
     "field_description": [...],
     "row_count": 1000,
     "sample_data": [...],
-    "data_file": "data/query_result_xxx.csv"
+    "data_file": "output/query_result.csv"
   },
   "metadata": {
     "data_source": "hive",
@@ -191,9 +241,21 @@ description: 多数据源数据查询技能，支持自然语言转SQL、Hive、
 
 ## 依赖配置
 
+### Connector 模块（强制使用）
+
+| 数据源 | 导入路径 | 模块文件 |
+|--------|---------|----------|
+| CSV | `from connectors.tool.csv_connector import CSVConnector` | connectors/tool/csv_connector.py |
+| JSON | `from connectors.tool.json_connector import JSONConnector` | connectors/tool/json_connector.py |
+| Excel | `from connectors.tool.excel_connector import ExcelConnector` | connectors/tool/excel_connector.py |
+| MySQL | `from connectors.datawarehouse.mysql import MySQLConnector` | connectors/datawarehouse/mysql.py |
+| ClickHouse | `from connectors.datawarehouse.clickhouse import ClickHouseConnector` | connectors/datawarehouse/clickhouse.py |
+| Hive | `from connectors.datawarehouse.hive import HiveConnector` | connectors/datawarehouse/hive.py |
+| PG | `from connectors.datawarehouse.postgres import PostgresConnector` | connectors/datawarehouse/postgres.py |
+
+### 其他依赖
+
 - 数据资产: data/indicator/core-indicator-dict.md（指标口径）
-- 数仓连接器: connectors/hive-connector.md、connectors/clickhouse-connector.md
-- 工具连接器: connectors/excel-connector.md、connectors/csv-connector.md
 - 口径规则: rules/core/indicator-caliber.md
 
 ## 使用示例

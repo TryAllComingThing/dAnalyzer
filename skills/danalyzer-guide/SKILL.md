@@ -47,7 +47,7 @@ dAnalyzer 是：
 
 ## 执行入口
 
-**danalyzer-core** (agents/danalyzer-core.md) — 唯一执行入口
+**danalyzer-core** (skills/danalyzer-core/SKILL.md) — 唯一执行入口
 
 ## 快速调用
 
@@ -56,15 +56,13 @@ dAnalyzer 是：
 Skill: data-query   # 数据查询
 Skill: visual       # 可视化
 Skill: report       # 报告生成
-Skill: compliance   # 合规检查
-Skill: security     # 安全脱敏
+Skill: security     # 安全脱敏 + 合规检查
 ```
 
 ## 安全优先
 
 数据导出前必须:
-1. 调用 compliance 合规检查
-2. 调用 security 脱敏处理
+1. 调用 security 进行合规检查和脱敏处理
 
 ---
 

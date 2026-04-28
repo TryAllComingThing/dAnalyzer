@@ -20,7 +20,6 @@
     "./skills/"
   ],
   "agents": [
-    "./agents/danalyzer-core.md",
     "./agents/error-handler.md"
   ]
 }

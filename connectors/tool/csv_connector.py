@@ -57,17 +57,22 @@ class CSVConnector(BaseFileConnector):
             with open_func(file_path, 'r', encoding=opts["encoding"]) as f:
                 reader = csv.reader(f, delimiter=opts["delimiter"])
 
-                # 读取表头
                 columns = []
                 rows = []
 
                 if opts["has_header"]:
-                    columns = next(reader)
+                    try:
+                        columns = next(reader)
+                    except StopIteration:
+                        columns = []
                 else:
-                    # 无表头时生成默认列名
-                    first_row = next(reader)
-                    columns = [f"col_{i}" for i in range(len(first_row))]
-                    rows.append(first_row)
+                    try:
+                        first_row = next(reader)
+                    except StopIteration:
+                        first_row = None
+                    if first_row:
+                        columns = [f"col_{i}" for i in range(len(first_row))]
+                        rows.append(first_row)
 
                 # 读取数据
                 for i, row in enumerate(reader):

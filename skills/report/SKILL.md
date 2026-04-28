@@ -1,60 +1,188 @@
 ---
 name: report
-description: 报告生成技能，支持日报、周报、月报、临时报告、对比报告、仪表盘等
+description: 报告生成技能，支持日报、周报、月报、临时报告、对比报告。所有报告输出前必须经过 security 脱敏处理。
 ---
 
-# 报告生成技能 (Report)
+# Report — 报告生成技能
 
-## When to Activate
+## 定位
 
-- Use this skill when generating reports or analytical documents
-- Use this skill when creating daily reports, weekly reports, or monthly reports
-- Use this skill when performing comparative analysis
-- Use this skill when building dashboards or visualization configs
-- Use this skill when creating ad-hoc analysis reports
+report 是数据输出层的核心技能，负责将分析结果组织为结构化报告。
 
-## 核心能力
+**输出前强制**: 所有报告必须经过 `security` 脱敏处理（见 AGENTS.md 安全规范）。
 
-1. **日报生成** - 每日核心指标
-2. **周报生成** - 每周汇总分析
-3. **月报生成** - 深度月度分析
-4. **临时报告** - 按需即时生成
-5. **对比报告** - 环比/同比/竞品对比
-6. **仪表盘** - 可视化仪表盘配置
+---
+
+## 报告类型与结构
+
+### 1. 日报 (daily-report.md)
+
+```
+日报结构:
+├── 今日概览（1-2 句）
+├── 核心指标卡片（3-5 个 KPI）
+├── 趋势迷你图
+├── 昨日异常/亮点
+└── 今日关注事项
+```
+
+### 2. 周报 (weekly-report.md)
+
+```
+周报结构:
+├── 本周摘要（3-5 句）
+├── 核心指标趋势（含环比）
+│   ├── 指标 A: 本周值 vs 上周值 (环比 ±X%)
+│   └── 指标 B: 本周值 vs 上周值 (环比 ±X%)
+├── 维度拆解（按地区/产品/渠道）
+├── TOP 10 榜单
+├── 异常指标说明
+├── 本周亮点
+└── 下周关注
+```
+
+### 3. 月报 (monthly-report.md)
+
+```
+月报结构:
+├── 月度摘要
+├── 核心指标趋势（含同比 + 环比）
+├── 分维度深度分析
+│   ├── 地区维度
+│   ├── 产品维度
+│   └── 用户维度
+├── 趋势分析（3-6 个月趋势线）
+├── 异常检测结果
+├── 行业对比（如有 context-retriever 数据）
+├── 亮点与风险
+└── 下月展望
+```
+
+### 4. 对比报告 (comparison-report.md)
+
+```
+对比报告结构:
+├── 对比概览
+├── 差异指标表（A vs B）
+│   ├── 指标名 | A 值 | B 值 | 差异 | 差异%
+│   └── ...
+├── 差异原因分析
+├── 效应量指标（Cohen's d / 百分比差异）
+└── 结论与建议
+```
+
+### 5. 临时报告 (ad-hoc-report.md)
+
+```
+临时报告结构:
+├── 分析背景与问题
+├── 数据来源与口径
+├── 分析结果
+│   ├── 核心发现
+│   ├── 支撑数据
+│   └── 图表
+├── 洞察与建议
+└── 限制说明（数据局限性）
+```
+
+---
+
+## 核心指标模板
+
+### 电商通用指标
+
+| 指标 | 计算公式 | 单位 |
+|------|---------|------|
+| GMV | `SUM(actual_amount)` | 元 |
+| 订单量 | `COUNT(DISTINCT order_id)` | 单 |
+| 客单价 | `GMV / 订单量` | 元 |
+| 下单用户数 | `COUNT(DISTINCT user_id)` | 人 |
+| 转化率 | `下单用户数 / 访问用户数` | % |
+| 退款率 | `退款订单数 / 总订单数` | % |
+| ARPU | `GMV / 用户数` | 元 |
+
+### 环比/同比计算公式
+
+```
+环比 = (本期值 - 上期值) / 上期值 × 100%
+同比 = (本期值 - 去年同期值) / 去年同期值 × 100%
+占比 = 分类值 / 总值 × 100%
+```
+
+### 变化判定规则
+
+| 变化幅度 | 标记 | 说明 |
+|---------|------|------|
+| ≤ 5% | 持平 | 正常波动范围 |
+| 5%-10% | 小幅 ↑/↓ | 关注，但不是异常 |
+| 10%-20% | 显著 ↑/↓ | 需要分析原因 |
+| > 20% | 大幅 ↑/↓ | 必须解释原因 |
+| > 50% | 异常 ↑/↓ | 可能数据问题，需核验 |
+
+---
+
+## 报告格式规范
+
+### 文字规范
+
+- **标题**: 简洁明确，包含时间范围和主题（如"2026年4月第4周销售周报"）
+- **摘要**: 3-5 句概括核心结论，先结论后数据
+- **数字格式**: 千分位分隔，保留 1-2 位小数；百分比保留 1 位小数
+- **趋势描述**: "环比增长 X%" 比 "上涨" 更精确
+
+### 图表规范
+
+- 每个图表必须有标题和轴标签（含单位）
+- 趋势图建议添加 7/30 日移动平均线
+- 对比图必须标注差异百分比
+- 配色统一使用 visual/chart-standard.md 定义的企业色
+
+### 报告导出
+
+```
+输出格式: HTML（优先，支持交互式图表）/ PDF / Markdown
+数据附件: CSV（原始数据）/ Excel（格式化数据 + 图表）
+命名规范: {报告类型}_{时间范围}_{生成日期}.{格式}
+  示例: weekly-report_2026W17_20260428.html
+```
+
+---
+
+## 执行流程
+
+```
+[用户需求] → [确定报告类型] → [选择子技能]
+    │
+    ▼
+1. 确定报告范围（时间、维度、指标）
+2. 调用 data-query 提取数据
+3. 调用 data-clean 清洗数据（如有必要）
+4. 调用 data-analysis 计算统计指标
+5. 调用 visual 生成图表
+6. 组装报告内容
+7. ⚠️ 调用 security 脱敏处理
+8. 输出最终报告
+```
+
+---
 
 ## 子技能
 
-| 子技能 | 文件 | 说明 |
-|--------|------|------|
-| 临时报告 | ad-hoc-report.md | 临时分析报告 |
-| 对比报告 | comparison-report.md | 对比分析 |
-| 日报 | daily-report.md | 每日报告 |
-| 仪表盘 | dashboard-report.md | 仪表盘配置 |
-| 月报 | monthly-report.md | 月度报告 |
-| 周报 | weekly-report.md | 周报 |
+| 子技能 | 文件 | 触发条件 |
+|--------|------|---------|
+| 日报 | daily-report.md | 用户需要日报/每日快报 |
+| 周报 | weekly-report.md | 用户需要周报/每周汇总 |
+| 月报 | monthly-report.md | 用户需要月报/月度分析 |
+| 对比报告 | comparison-report.md | 用户需要对比/环比/同比 |
+| 临时报告 | ad-hoc-report.md | 用户需要即时/临时分析报告 |
+| 仪表盘 | dashboard-report.md | 用户需要看板配置 |
 
-## 使用场景
+---
 
-### 场景1: 周报生成
-```
-用户: 生成上周周报
-→ 调用 report 技能 → 周报生成
-→ 取数 → 指标计算 → 趋势分析
-→ 输出周报文档
-```
+## 依赖
 
-### 场景2: 对比分析
-```
-用户: 对比本月和上月数据
-→ 调用 report 技能 → 对比报告
-→ 环比分析
-→ 输出对比结果
-```
-
-## 依赖配置
-
-- skills/data-query - 数据查询
-- skills/data-clean - 数据清洗
-- skills/data-analysis - 数据分析
-- skills/visualization - 可视化
-- rules/core/indicator-caliber.md - 指标口径
+- **上游**: skills/data-query, skills/data-clean, skills/data-analysis
+- **可视化**: skills/visual
+- **安全（强制）**: skills/security
+- **口径规则**: rules/core/indicator-caliber.md, rules/core/dimension-standard.md
+- **格式规范**: rules/base/report-format.md

@@ -25,7 +25,7 @@
 - assets/indicator/core-indicator-dict.md
 - assets/indicator/sales-indicator.md
 - assets/indicator/user-indicator.md
-- skills/query/multi-source-query.md
+- skills/data-query/SKILL.md
 - skills/visual/chart-standard.md
 - skills/clean/null-abnormal-clean.md
 

@@ -18,6 +18,44 @@ description: 可视化技能，支持ECharts图表生成、趋势图、对比图
 - Use this skill when need responsive charts that adapt to different screen sizes
 - Use this skill when user wants to view or download the underlying data
 
+---
+
+## ⚠️ 数据读写强制使用 Connector
+
+**生成 HTML 前必须通过 Connector 读取分析结果，禁止用 `open()` / `json.load()` 裸读**。
+
+```python
+# ✅ 正确: 使用 JSONConnector 读取 data-analysis 的分析结果
+from connectors.tool.json_connector import JSONConnector
+jc = JSONConnector()
+result = jc.read('output/data_analysis_result.json')
+analysis_data = result.raw_data
+
+# ✅ 正确: 使用 CSVConnector 读取原始数据
+from connectors.tool.csv_connector import CSVConnector
+cc = CSVConnector()
+result = cc.read('output/query_result.csv')
+
+# ❌ 错误: import json; json.load(open('file.json'))
+# ❌ 错误: import csv; csv.DictReader(open('file.csv'))
+```
+
+**写入输出文件也走 Connector**:
+
+```python
+# 写 CSV 供下载
+from connectors.tool.csv_connector import CSVConnector
+cc = CSVConnector()
+cc.write(data_list, 'output/export.csv')
+
+# 写 Excel 供下载
+from connectors.tool.excel_connector import ExcelConnector
+ec = ExcelConnector()
+ec.write(data_list, 'output/export.xlsx')
+```
+
+---
+
 ## 核心能力
 
 1. **ECharts集成** ⭐ — 完整ECharts配置，生成交互式HTML图表
@@ -215,9 +253,9 @@ chart.on('click', function(params) {
       "fields": ["date", "sales", "orders"]
     },
     "download_files": {
-      "csv": "data/sales_trend_20260425.csv",
-      "excel": "data/sales_trend_20260425.xlsx",
-      "json": "data/sales_trend_20260425.json"
+      "csv": "output/sales_trend_20260425.csv",
+      "excel": "output/sales_trend_20260425.xlsx",
+      "json": "output/sales_trend_20260425.json"
     }
   },
   "metadata": {
@@ -385,10 +423,18 @@ chart.on('click', function(params) {
 
 ## 依赖配置
 
+### Connector 模块（强制使用 — 数据读写必须走 Connector）
+
+| 操作 | 导入路径 |
+|------|---------|
+| 读 CSV | `from connectors.tool.csv_connector import CSVConnector` |
+| 读 JSON | `from connectors.tool.json_connector import JSONConnector` |
+| 写 Excel | `from connectors.tool.excel_connector import ExcelConnector` |
+
+**禁止**用 `import csv` / `json.load(open())` / `open().write()` 裸读写数据文件。
+
 - skills/data-query - 数据查询
 - skills/data-clean - 数据清洗
-- connectors/tool/csv_connector - CSV导出
-- connectors/tool/excel_connector - Excel导出
 - rules/base/chart-standard.md - 图表规范
 - ECharts CDN: https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js
 

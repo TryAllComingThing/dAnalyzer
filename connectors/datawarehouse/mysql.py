@@ -26,7 +26,7 @@ class MySQLConnector(BaseConnector):
                 port=int(self.config.get("port", 3306)),
                 database=self.config.get("database", "test"),
                 user=self.config.get("user", "root"),
-                password=self.config.get("password", ""),
+                password=self.config["password"],
                 charset=self.config.get("charset", "utf8mb4"),
                 connect_timeout=self.default_timeout / 1000,
             )
@@ -44,6 +44,8 @@ class MySQLConnector(BaseConnector):
 
         cursor = self._connection.cursor()
         try:
+            timeout_ms = int(self.default_timeout)
+            cursor.execute(f"SET SESSION max_execution_time = {timeout_ms}")
             cursor.execute(sql, params or {})
 
             # 获取列名

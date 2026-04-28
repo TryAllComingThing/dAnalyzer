@@ -112,6 +112,6 @@ rules/[级别]/[文件名].md
 ## 注意事项
 
 1. legal级规则必须严格遵守，违规会导致任务终止
-2. dynamic规则到期后需归档至storage/version/
-3. 所有规则校验结果需记录至storage/log/
+2. dynamic 规则到期后标记为已过期，从校验链中移除
+3. 规则校验结果记录至执行日志（由 danalyzer-core 输出）
 4. 规则更新需遵循版本管理规范

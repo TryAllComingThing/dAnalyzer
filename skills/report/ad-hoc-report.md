@@ -27,7 +27,7 @@
 
 ## 调用资源
 
-- skills/query/multi-source-query.md
+- skills/data-query/SKILL.md
 - skills/clean/null-abnormal-clean.md
 - skills/model/correlation-analysis.md
 - skills/visual/chart-standard.md

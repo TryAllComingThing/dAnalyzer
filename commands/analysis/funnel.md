@@ -3,7 +3,7 @@ name: analysis funnel
 description: 漏斗分析，分析用户转化路径和流失环节
 trigger: analysis funnel
 related_skills:
-  - funnel-analysis
+  - model
   - data-analysis
   - visual
 ---

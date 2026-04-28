@@ -3,6 +3,7 @@ Base Connector - 所有数据源连接器的基类
 """
 
 import os
+import re
 import csv
 import json
 import logging
@@ -123,17 +124,27 @@ class BaseConnector(ABC):
             self._connection = None
             logger.info(f"[{self.connector_name}] Disconnected")
 
+    FORBIDDEN_SQL = re.compile(
+        r'\b(DROP|DELETE|TRUNCATE|ALTER|CREATE|INSERT|UPDATE|GRANT|REVOKE)\b',
+        re.IGNORECASE
+    )
+
     def execute(self, sql: str, params: Optional[Dict] = None) -> QueryResult:
         """
-        执行SQL查询
+        执行SQL查询（只读）
 
         Args:
-            sql: SQL语句
+            sql: SELECT 查询语句
             params: 查询参数
 
         Returns:
             QueryResult: 查询结果
         """
+        if self.FORBIDDEN_SQL.search(sql):
+            raise RuntimeError(
+                f"Write operation blocked by connector-level security. "
+                f"Only SELECT queries are permitted."
+            )
         if self._connection is None:
             self.connect()
 
@@ -196,7 +207,9 @@ def create_connector(connector_type: str, config: Dict[str, str] = None):
     if connector_type not in connector_map:
         raise ValueError(f"Unknown connector type: {connector_type}")
 
-    # 延迟导入避免循环依赖
-    module = __import__(f'.{connector_type}', fromlist=[connector_map[connector_type]])
+    module = __import__(
+        f'connectors.datawarehouse.{connector_type}',
+        fromlist=[connector_map[connector_type]]
+    )
     connector_class = getattr(module, connector_map[connector_type])
     return connector_class(config)

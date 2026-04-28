@@ -1,39 +1,14 @@
 #!/usr/bin/env bash
 # SessionStart hook for dAnalyzer plugin
-# 加载使用指南 + 角色灵魂 + 知识体系
-
+# 只注入路由规则（轻量级 ~500B），角色和灵魂通过 CLAUDE.md 按需引用
 set -euo pipefail
 
-# Determine plugin root directory
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# ============================================
-# 0. 加载 danalyzer-core 核心调度器上下文
-# ============================================
-core_content=$(cat "${PLUGIN_ROOT}/agents/use-danalyzer.md" 2>&1 || echo "Error reading use-danalyzer agent")
+# 只加载路由规则
+routing_content=$(cat "${PLUGIN_ROOT}/agents/use-danalyzer.md" 2>&1 || echo "")
 
-# ============================================
-# 1. 加载 danalyzer-guide 使用指南
-# ============================================
-#danalyzer_guide_content=$(cat "${PLUGIN_ROOT}/skills/danalyzer-guide/SKILL.md" 2>&1 || echo "Error reading danalyzer-guide skill")
-
-# ============================================
-# 2. 加载角色定义 (Role)
-# ============================================
-role_content=$(cat "${PLUGIN_ROOT}/data/profile/role.md" 2>&1 || echo "")
-
-# ============================================
-# 3. 加载灵魂定义 (Soul)
-# ============================================
-soul_content=$(cat "${PLUGIN_ROOT}/data/profile/soul.md" 2>&1 || echo "")
-
-# ============================================
-# 4. 加载知识激活 (Knowledge)
-# ============================================
-knowledge_content=$(cat "${PLUGIN_ROOT}/data/profile/knowledge.md" 2>&1 || echo "")
-
-# Escape string for JSON embedding
 escape_for_json() {
     local s="$1"
     s="${s//\\/\\\\}"
@@ -44,43 +19,8 @@ escape_for_json() {
     printf '%s' "$s"
 }
 
-core_escaped=$(escape_for_json "$core_content")
+routing_escaped=$(escape_for_json "$routing_content")
 
-danalyzer_guide_escaped=$(escape_for_json "$danalyzer_guide_content")
-role_escaped=$(escape_for_json "$role_content")
-soul_escaped=$(escape_for_json "$soul_content")
-knowledge_escaped=$(escape_for_json "$knowledge_content")
-
-# 构建完整的上下文
-session_context="<EXTREMELY_IMPORTANT>
-你是 dAnalyzer，一位资深数据分析师顾问。
-
-**核心调度器 (danalyzer-core)**:
-${core_escaped}
-
-**角色定义**:
-${role_escaped}
-
-**核心理念**:
-${soul_escaped}
-
-**知识体系**:
-${knowledge_escaped}
-
-**使用指南**:
-${danalyzer_guide_escaped}
-
-**重要提示**:
-- 你不仅执行数据查询，还要主动提供业务洞察
-- 始终思考数据对业务的含义
-- 不确定的地方要明确说明
-</EXTREMELY_IMPORTANT>"
-
-# Output context injection as JSON
-if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
-  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$danalyzer_guide_escaped"
-else
-  printf '{\n  "additionalContext": "%s"\n}\n' "$danalyzer_guide_escaped"
-fi
+printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$routing_escaped"
 
 exit 0

@@ -3,7 +3,7 @@ name: analysis rfm
 description: RFM 用户价值分析，识别高价值用户和流失风险用户
 trigger: analysis rfm
 related_skills:
-  - rfm-analysis
+  - model
   - data-analysis
   - visual
 ---
