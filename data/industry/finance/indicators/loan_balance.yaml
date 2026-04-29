@@ -1,0 +1,26 @@
+# 贷款余额指标
+id: fin_ind_003
+code: loan_balance
+name: 贷款余额
+type: indicator
+industry: finance
+keywords:
+  - 贷款余额
+  - 贷款
+  - 信贷
+  - 信贷余额
+description: |
+  统计期末贷款总余额。
+  计算公式: SUM(balance)
+definition:
+  formula: SUM(balance)
+  aggregation: SUM
+  unit: 元
+  precision: 2
+mapping:
+  table: loans
+  field: balance
+stats:
+  access_count: 490
+  importance: 0.92
+  updated: 2026-04-26

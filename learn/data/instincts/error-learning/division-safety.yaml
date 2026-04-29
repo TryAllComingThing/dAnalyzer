@@ -1,41 +1,6 @@
-# learn/data/instincts/error-learning/division-safety.yaml
----
 name: division-safety
 description: 除零错误预防 - 防止SQL除零错误
 confidence: 0.9
 trigger:
   type: error_context
   pattern: "division_by_zero"
----
-
-# 除零错误预防 Instinct
-
-## 触发条件
-
-检测到 SQL 中包含除法运算时触发。
-
-## 应用逻辑
-
-当检测到除法运算符时:
-
-1. **检查除数是否可能为0**
-2. **提示使用 NULLIF 避免除零**
-3. **提供修正示例**
-
-## 示例
-
-```
-原始: SELECT 销售额 / 成本 FROM ...
-
-提示: 注意: 成本字段可能为0，建议使用 NULLIF 防止除零错误
-
-修正: SELECT 销售额 / NULLIF(成本, 0) FROM ...
-```
-
-## 错误模式参考
-
-| 错误类型 | 上下文 | 解决方案 |
-|----------|--------|----------|
-| 除零错误 | 包含除法运算 | 使用 NULLIF |
-| 字段缺失 | 字段名错误 | 字段自动补全 |
-| 数据类型 | 类型不匹配 | 隐式转换 |

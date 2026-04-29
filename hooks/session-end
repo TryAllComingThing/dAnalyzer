@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # SessionEnd hook for dAnalyzer plugin
-# Session cleanup and summary
-
+# Session cleanup, learning system summary, and insight extraction
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -18,15 +17,34 @@ check_uncommitted() {
     fi
 }
 
+# 运行学习系统会话总结
+run_learning_summary() {
+    local summary_script="${PLUGIN_ROOT}/learn/hooks/session-summary"
+    if [ -f "$summary_script" ]; then
+        # 以纯文本形式调用（压制 JSON 包装），捕获学习系统输出
+        CLAUDE_PLUGIN_ROOT= bash "$summary_script" 2>/dev/null || true
+    fi
+}
+
 # Output session summary
 output_summary() {
     local summary="#[dAnalyzer] Session ended"
 
+    # 捕获学习系统输出（不含 JSON 包装）
+    local learn_output
+    learn_output=$(run_learning_summary)
+
+    # 合并摘要
+    local combined="#[dAnalyzer] Session ended"
+    if [ -n "$learn_output" ]; then
+        combined="${combined}"$'\n'"${learn_output}"
+    fi
+
     if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
-        local escaped=$(echo "$summary" | sed 's/\\/\\\\/g; s/"/\\"/g')
+        local escaped=$(echo "$combined" | sed 's/\\/\\\\/g; s/"/\\"/g')
         printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "Stop",\n    "additionalContext": "%s"\n  }\n}\n' "$escaped"
     else
-        echo "$summary"
+        echo "$combined"
     fi
 }
 

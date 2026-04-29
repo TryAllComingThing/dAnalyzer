@@ -20,6 +20,7 @@
     "./skills/"
   ],
   "agents": [
+    "./agents/danalyzer.md",
     "./agents/error-handler.md"
   ]
 }

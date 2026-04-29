@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# PostToolUse hook for dAnalyzer
+# Records observations and matches instincts after each tool call
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+LEARN_ROOT="${PLUGIN_ROOT}/learn"
+
+# 1) 记录观察（写入 JSONL 文件，无 stdout）
+observe_script="${LEARN_ROOT}/hooks/analyze-observe"
+if [ -f "$observe_script" ]; then
+    bash "$observe_script" 2>/dev/null || true
+fi
+
+# 2) 匹配本能（仅在 Skill 调用时输出匹配结果）
+apply_script="${LEARN_ROOT}/hooks/instinct-apply"
+if [ -f "$apply_script" ]; then
+    apply_output=$(bash "$apply_script" 2>/dev/null || true)
+    if [ -n "$apply_output" ]; then
+        # 将匹配的本能注入上下文
+        escaped=$(echo "$apply_output" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr '\n' ' ')
+        printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "PostToolUse",\n    "additionalContext": "%s"\n  }\n}\n' "$escaped"
+    fi
+fi
+
+exit 0

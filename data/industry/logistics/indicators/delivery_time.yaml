@@ -1,0 +1,26 @@
+# 平均配送时长指标
+id: log_ind_001
+code: delivery_time
+name: 平均配送时长
+type: indicator
+industry: logistics
+keywords:
+  - 配送时长
+  - 配送时间
+  - 时效
+  - delivery
+description: |
+  物流核心指标，表示从揽收到签收的平均时长。
+  计算公式: AVG(TIMESTAMPDIFF(HOUR, pickup_time, sign_time))
+definition:
+  formula: AVG(TIMESTAMPDIFF(HOUR, pickup_time, sign_time))
+  aggregation: AVG
+  unit: 小时
+  precision: 1
+mapping:
+  table: waybills
+  field: delivery_hours
+stats:
+  access_count: 580
+  importance: 0.95
+  updated: 2026-04-26

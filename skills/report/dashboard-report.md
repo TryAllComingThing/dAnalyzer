@@ -11,15 +11,15 @@
    - 关键指标一览
 
 2. **趋势图表**
-   - 调用 skills/visual/trend-chart.md
+   - 调用 skills/visual/（趋势图）
    - 核心指标趋势
 
 3. **占比分析**
-   - 调用 skills/visual/proportion-chart.md
+   - 调用 skills/visual/（占比图）
    - 维度分布
 
 4. **对比分析**
-   - 调用 skills/visual/comparison-chart.md
+   - 调用 skills/visual/（对比图）
    - 环比/同比对比
 
 5. **明细数据**

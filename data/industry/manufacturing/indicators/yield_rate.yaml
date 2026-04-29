@@ -1,0 +1,27 @@
+# 良品率指标
+id: mfg_ind_002
+code: yield_rate
+name: 良品率
+type: indicator
+industry: manufacturing
+keywords:
+  - 良品率
+  - 合格率
+  - 良品
+  - 合格品
+  - yield
+description: |
+  质量核心指标，合格产品占抽检数量的比例。
+  计算公式: SUM(pass_qty) / SUM(sample_qty)
+definition:
+  formula: SUM(pass_qty) / SUM(sample_qty)
+  aggregation: RATIO
+  unit: '%'
+  precision: 2
+mapping:
+  table: quality_checks
+  field: pass_qty
+stats:
+  access_count: 560
+  importance: 0.95
+  updated: 2026-04-26

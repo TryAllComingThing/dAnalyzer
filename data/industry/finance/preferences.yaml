@@ -1,0 +1,22 @@
+# 用户偏好设置
+user: default
+preferences:
+  default_industry: finance
+  preferred_dimensions:
+    - 区域
+    - 产品类型
+  default_time_range: 本月
+  preferred_format: chart
+frequent_queries:
+  - query: NPL
+    count: 40
+  - query: 不良贷款率
+    count: 35
+  - query: 存款余额
+    count: 28
+frequent_scenarios:
+  - code: risk_analysis
+    count: 18
+  - code: asset_liability
+    count: 14
+updated: 2026-04-26

@@ -1,40 +1,6 @@
-# learn/data/instincts/recommendation/smart-recommendation.yaml
----
 name: smart-recommendation
 description: 智能推荐 - 基于历史分析模式主动推荐
 confidence: 0.7
 trigger:
   type: context_match
   pattern: "query_pattern"
----
-
-# 智能推荐 Instinct
-
-## 触发条件
-
-当检测到用户查询模式匹配已知模式时触发。
-
-## 应用逻辑
-
-### 1. 查询补全
-```
-用户: "查销售"
-→ 建议: "您可能想查询: 销售额/销售量/销售趋势"
-```
-
-### 2. 延伸分析
-```
-用户: "查本月销售额"
-→ 建议: "是否需要: 环比对比 | 区域分布 | Top产品"
-```
-
-### 3. 历史参考
-```
-用户: 重复查询
-→ 上次分析结果: [链接]
-```
-
-## 置信度
-
-- 基础置信度: 0.7
-- 完全匹配时: 0.85

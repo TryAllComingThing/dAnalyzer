@@ -1,0 +1,31 @@
+# 风险分析场景
+id: fin_scn_001
+code: risk_analysis
+name: 风险分析
+type: scenario
+industry: finance
+keywords:
+  - 风险分析
+  - 风控
+  - NPL
+  - 不良率
+  - 信用风险
+description: |
+  金融风险综合分析，包含:
+  - 不良贷款率趋势
+  - 五级分类分布
+  - 行业集中度分析
+content:
+  required:
+    - npl_ratio
+    - loan_balance
+  optional:
+    - overdue_rate
+    - provision_coverage
+  dimensions:
+    时间维度: [月, 季度, 年]
+    产品维度: [贷款类型, 行业, 区域]
+stats:
+  usage_count: 150
+  satisfaction: 0.9
+  updated: 2026-04-26

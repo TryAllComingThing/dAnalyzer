@@ -4,14 +4,9 @@
 description: "轻量级应用规则存储"
 
 structure:
-  recommendation/: "智能推荐"
-    "smart-recommendation.yaml": "通用智能推荐"
-
-  error-learning/: "错误学习"
-    "division-safety.yaml": "除零错误预防"
-
-  auto-discovery/: "自动发现"
-    "industry-indicator.yaml": "行业指标发现"
+  recommendation: "智能推荐"
+  error-learning: "错误学习"
+  auto-discovery: "自动发现"
 
 instinct_types:
   - recommendation:

@@ -1,0 +1,80 @@
+# 物流行业指标索引
+
+## 时效指标
+
+```yaml
+category: timeliness
+total_count: 5
+
+index:
+  - key: delivery_time
+    name: 平均配送时长
+    keywords: [配送时长, 配送时间, 时效]
+    related_tables: [waybills]
+  - key: on_time_rate
+    name: 准时率
+    keywords: [准时率, 准时, 按时到达]
+    related_tables: [waybills]
+  - key: delivery_success_rate
+    name: 妥投率
+    keywords: [妥投率, 妥投, 签收率, 成功投递]
+    related_tables: [waybills]
+  - key: transit_time
+    name: 在途时长
+    keywords: [在途, 运输时长, 路途时间]
+    related_tables: [waybills]
+  - key: transfer_stay
+    name: 中转停留
+    keywords: [中转停留, 中转时长, 中转]
+    related_tables: [waybills]
+```
+
+## 成本指标
+
+```yaml
+category: cost
+total_count: 4
+
+index:
+  - key: transport_cost
+    name: 运输成本
+    keywords: [运输成本, 运费, 物流费用]
+    related_tables: [waybills]
+  - key: cost_per_order
+    name: 单均成本
+    keywords: [单均成本, 平均成本, 每单成本]
+    related_tables: [waybills]
+  - key: fuel_cost
+    name: 油耗成本
+    keywords: [油耗, 燃油费, 油费]
+    related_tables: [waybills]
+  - key: labor_cost
+    name: 人力成本
+    keywords: [人力成本, 人工费, 司机费用]
+    related_tables: [waybills]
+```
+
+## 运营指标
+
+```yaml
+category: operations
+total_count: 4
+
+index:
+  - key: parcel_volume
+    name: 包裹量
+    keywords: [包裹量, 运单量, 单量, 件量]
+    related_tables: [waybills]
+  - key: vehicle_utilization
+    name: 车辆利用率
+    keywords: [车辆利用率, 车辆使用率, 用车率]
+    related_tables: [vehicles]
+  - key: load_factor
+    name: 满载率
+    keywords: [满载率, 装载率, 空间利用率]
+    related_tables: [vehicles]
+  - key: route_coverage
+    name: 线路覆盖率
+    keywords: [线路覆盖, 覆盖城市, 网络覆盖]
+    related_tables: [routes]
+```

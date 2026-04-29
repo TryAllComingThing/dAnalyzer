@@ -1,0 +1,27 @@
+# 包裹量指标
+id: log_ind_003
+code: parcel_volume
+name: 包裹量
+type: indicator
+industry: logistics
+keywords:
+  - 包裹量
+  - 运单量
+  - 单量
+  - 件量
+  - 订单量
+description: |
+  统计周期内的总运单数量。
+  计算公式: COUNT(waybill_id)
+definition:
+  formula: COUNT(waybill_id)
+  aggregation: COUNT
+  unit: 单
+  precision: 0
+mapping:
+  table: waybills
+  field: waybill_id
+stats:
+  access_count: 450
+  importance: 0.85
+  updated: 2026-04-26

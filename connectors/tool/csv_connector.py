@@ -83,11 +83,15 @@ class CSVConnector(BaseFileConnector):
                 row_count = len(rows)
                 logger.info(f"[CSV] Read {row_count} rows from {file_path}")
 
+                # 将行数据转为 dict 列表（zip columns + rows）
+                raw_data = [dict(zip(columns, row)) for row in rows] if columns else rows
+
                 return FileResult(
                     success=True,
                     output_path=file_path,
                     row_count=row_count,
                     columns=columns,
+                    raw_data=raw_data,
                 )
 
         except Exception as e:

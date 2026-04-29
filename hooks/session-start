@@ -1,13 +1,25 @@
 #!/usr/bin/env bash
 # SessionStart hook for dAnalyzer plugin
-# 只注入路由规则（轻量级 ~500B），角色和灵魂通过 CLAUDE.md 按需引用
+# 注入精简路由规则 + 学习系统本能索引
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# 只加载路由规则
-routing_content=$(cat "${PLUGIN_ROOT}/agents/use-danalyzer.md" 2>&1 || echo "")
+# 加载精简路由规则（来自 hooks/session-routing.md）
+routing_content=$(cat "${PLUGIN_ROOT}/hooks/session-routing.md" 2>&1 || echo "")
+
+# 加载学习系统本能索引（以纯文本形式获取，避免 JSON 嵌套）
+learn_context=$(CLAUDE_PLUGIN_ROOT= "${PLUGIN_ROOT}/learn/hooks/load-instincts" 2>/dev/null || echo "")
+
+# 合并上下文
+combined_context=""
+if [ -n "$routing_content" ]; then
+    combined_context="${routing_content}"
+fi
+if [ -n "$learn_context" ]; then
+    combined_context="${combined_context}"$'\n'"${learn_context}"
+fi
 
 escape_for_json() {
     local s="$1"
@@ -19,8 +31,8 @@ escape_for_json() {
     printf '%s' "$s"
 }
 
-routing_escaped=$(escape_for_json "$routing_content")
+context_escaped=$(escape_for_json "$combined_context")
 
-printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$routing_escaped"
+printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$context_escaped"
 
 exit 0

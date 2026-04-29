@@ -1,0 +1,30 @@
+# 资产负债分析场景
+id: fin_scn_002
+code: asset_liability
+name: 资产负债分析
+type: scenario
+industry: finance
+keywords:
+  - 资产负债
+  - 存贷比
+  - 期限结构
+  - 流动性
+description: |
+  资产负债综合分析，包含:
+  - 存款余额 vs 贷款余额
+  - 存贷比分析
+  - 期限结构匹配
+content:
+  required:
+    - deposit_balance
+    - loan_balance
+  optional:
+    - net_interest_income
+    - cost_income_ratio
+  dimensions:
+    时间维度: [月, 季度, 年]
+    产品维度: [产品类型, 期限]
+stats:
+  usage_count: 110
+  satisfaction: 0.87
+  updated: 2026-04-26

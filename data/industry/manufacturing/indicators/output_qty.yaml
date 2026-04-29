@@ -1,0 +1,26 @@
+# 产出量指标
+id: mfg_ind_003
+code: output_qty
+name: 产出量
+type: indicator
+industry: manufacturing
+keywords:
+  - 产出量
+  - 产量
+  - 生产数量
+  - 完工量
+description: |
+  统计周期内的总生产数量。
+  计算公式: SUM(actual_qty)
+definition:
+  formula: SUM(actual_qty)
+  aggregation: SUM
+  unit: 件
+  precision: 0
+mapping:
+  table: production_orders
+  field: actual_qty
+stats:
+  access_count: 390
+  importance: 0.85
+  updated: 2026-04-26

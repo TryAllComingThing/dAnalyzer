@@ -1,0 +1,84 @@
+# 金融行业指标索引
+
+## 规模指标
+
+```yaml
+category: scale
+total_count: 5
+
+index:
+  - key: deposit_balance
+    name: 存款余额
+    keywords: [存款余额, 存款, 储蓄]
+    related_tables: [accounts]
+  - key: loan_balance
+    name: 贷款余额
+    keywords: [贷款余额, 贷款, 信贷]
+    related_tables: [loans]
+  - key: total_assets
+    name: 总资产
+    keywords: [总资产, 资产规模, 资产总额]
+    related_tables: [accounts]
+  - key: customer_count
+    name: 客户数
+    keywords: [客户数, 客户量, 客户规模]
+    related_tables: [customers]
+  - key: account_count
+    name: 账户数
+    keywords: [账户数, 账户量, 账户规模]
+    related_tables: [accounts]
+```
+
+## 风险指标
+
+```yaml
+category: risk
+total_count: 5
+
+index:
+  - key: npl_ratio
+    name: 不良贷款率(NPL)
+    keywords: [不良贷款率, NPL, 不良率, 不良贷款]
+    related_tables: [loans]
+  - key: overdue_rate
+    name: 逾期率
+    keywords: [逾期率, 逾期, 逾期贷款]
+    related_tables: [loans]
+  - key: provision_coverage
+    name: 拨备覆盖率
+    keywords: [拨备覆盖率, 拨备, 风险覆盖]
+    related_tables: [loans]
+  - key: charge_off_rate
+    name: 坏账率
+    keywords: [坏账率, 坏账, 核销]
+    related_tables: [loans]
+  - key: capital_adequacy
+    name: 资本充足率
+    keywords: [资本充足率, 资本充足, 资本]
+    related_tables: [loans]
+```
+
+## 收益指标
+
+```yaml
+category: income
+total_count: 4
+
+index:
+  - key: net_interest_income
+    name: 净利息收入
+    keywords: [净利息收入, 利息收入, 息差]
+    related_tables: [transactions]
+  - key: fee_income
+    name: 中间业务收入
+    keywords: [中间业务收入, 手续费收入, 佣金收入]
+    related_tables: [transactions]
+  - key: nim
+    name: 净息差(NIM)
+    keywords: [净息差, NIM, 息差]
+    related_tables: [transactions]
+  - key: cost_income_ratio
+    name: 成本收入比
+    keywords: [成本收入比, 成本收入, 效率比]
+    related_tables: [transactions]
+```

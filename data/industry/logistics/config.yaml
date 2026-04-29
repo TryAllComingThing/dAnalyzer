@@ -1,0 +1,125 @@
+# 物流行业配置
+
+> 物流运输行业专用配置
+
+## 行业基础信息
+
+```yaml
+industry:
+  name: "物流"
+  code: "logistics"
+  version: "1.0"
+  maintainer: "物流数据团队"
+
+# 数据源
+datasource:
+  default: "mysql"
+  tables:
+    - waybills              # 运单表
+    - routes               # 线路表
+    - vehicles             # 车辆表
+    - drivers              # 司机表
+
+# 行业特征
+features:
+  time_sensitive: true
+  real_time_required: true
+  seasonal: false
+  has_inventory: false
+```
+
+## 行业指标
+
+### 时效指标
+
+| 指标 | 定义 | 计算公式 |
+|------|------|----------|
+| 平均配送时长 | 订单平均配送时间 | AVG(delivery_time - pickup_time) |
+| 准时率 | 准时到达比例 | COUNT(on_time) / COUNT(total) |
+| 妥投率 | 成功投递比例 | COUNT(delivered) / COUNT(total) |
+| 在途时长 | 运输途中的平均时间 | AVG(sign_time - departure_time) |
+| 中转停留 | 中转站停留时间 | AVG(next_departure - arrival) |
+
+### 成本指标
+
+| 指标 | 定义 | 计算公式 |
+|------|------|----------|
+| 运输成本 | 总运输费用 | SUM(transport_cost) |
+| 单均成本 | 每单平均运输成本 | SUM(transport_cost) / COUNT(waybill_id) |
+| 油耗成本 | 燃油总费用 | SUM(fuel_cost) |
+| 人力成本 | 司机及操作人员费用 | SUM(labor_cost) |
+
+### 运营指标
+
+| 指标 | 定义 | 计算公式 |
+|------|------|----------|
+| 包裹量 | 总运单数 | COUNT(waybill_id) |
+| 车辆利用率 | 车辆使用率 | SUM(used_hours) / SUM(available_hours) |
+| 满载率 | 车辆装载率 | AVG(actual_weight / max_load) |
+| 线路覆盖率 | 线路覆盖城市数 | COUNT(DISTINCT city) |
+
+## 表结构映射
+
+```yaml
+mappings:
+  waybills:
+    table: "waybills"
+    fields:
+      运单号: "waybill_id"
+      线路: "route_id"
+      车辆: "vehicle_id"
+      司机: "driver_id"
+      重量: "weight"
+      体积: "volume"
+      收件: "pickup_time"
+      签收: "sign_time"
+      状态: "status"
+    metrics:
+      包裹量: "COUNT(waybill_id)"
+      平均配送时长: "AVG(TIMESTAMPDIFF(HOUR, pickup_time, sign_time))"
+      妥投率: "SUM(CASE WHEN status='已签收' THEN 1 ELSE 0 END) / COUNT(*)"
+
+  routes:
+    table: "routes"
+    fields:
+      线路ID: "route_id"
+      出发城市: "departure_city"
+      目的城市: "arrival_city"
+      距离: "distance_km"
+      预计时长: "estimated_hours"
+
+  vehicles:
+    table: "vehicles"
+    fields:
+      车辆ID: "vehicle_id"
+      车牌号: "plate_number"
+      载重: "max_load"
+      容积: "max_volume"
+      状态: "status"
+```
+
+## 分析模板
+
+```yaml
+analysis_templates:
+  delivery_efficiency:
+    name: "配送效率分析"
+    steps:
+      - query: "配送时效数据"
+      - calculate: ["平均配送时长", "准时率", "妥投率"]
+      - analyze: ["线路效率对比"]
+
+  cost_analysis:
+    name: "运输成本分析"
+    steps:
+      - query: "运输成本数据"
+      - calculate: ["单均成本", "成本结构"]
+      - compare: ["不同线路成本对比"]
+
+  vehicle_utilization:
+    name: "车辆利用率分析"
+    steps:
+      - query: "车辆使用数据"
+      - calculate: ["车辆利用率", "满载率"]
+      - optimize: ["调度优化建议"]
+```

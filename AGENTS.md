@@ -1,42 +1,103 @@
-# dAnalyzer — Agent Instructions
+# dAnalyzer — Agent 系统说明
 
-> 数据分析核心 Agent 系统
-> 版本: 4.0
-
----
-
-## 设计理念
-
-1. **按需加载** — 仅在需要时 Read SKILL.md
-2. **自主决策** — 根据需求动态选择技能组合
-3. **Skill 规则优先** — SKILL.md 中定义的标准优先于通用知识
-4. **灵活组合** — 可跳过不需要的步骤
+> 多 Agent 路由 + 数据分析执行体系
+> 版本: 5.0
 
 ---
 
-## 执行入口
-
-danalyzer-core 是**唯一执行入口**，以 Skill 形式在主会话内运行：
+## 系统架构
 
 ```
-用户输入 → danalyzer-core（Skill 调用 · 主会话内运行）
-    ├── 需求理解 + 需求拆解（if 模糊）+ 任务规划（if 复杂）
-    ├── 技能决策 → Read SKILL.md → 按 Skill 规则执行
-    └── 异常 → spawn error-handler（唯一 spawn）
+SessionStart（hooks/session-routing.md 注入）
+    │
+    ▼
+用户输入 → 语义意图分类路由
+    │
+    ├── DATA_ANALYSIS → Agent 工具 spawn 子 Agent: danalyzer
+    ├── RESEARCH      → Agent 工具 spawn 子 Agent: research（预留）
+    ├── COMMAND       → 主会话直接执行
+    └── GENERAL       → 主会话正常处理
+              │
+              └── 路由准确性自检 + Red Flag 检查
+                    │
+                    ├── 异常 → spawn Agent: error-handler
+                    └── 子 agent 路由不匹配 → 输出 [reroute: target] 请求重路由
+```
+
+**Reroute 协议：** Agent 发现路由不匹配时输出 `[reroute: target]` 请求重路由。主会话捕获后重新路由。
+
+### Spawn 执行流
+
+DATA_ANALYSIS / RESEARCH 命中时，主会话使用 **Agent 工具** spawn 子 agent：
+
+```
+主会话路由命中 → Agent({ subagent_type: "general-purpose", prompt: "..." })
+    ↓
+子 agent 加载指令（agents/danalyzer.md + AGENTS.md）
+    ↓
+子 agent 自主执行：需求拆解 → 技能编排 → 加载 SKILL → 执行 → security
+    ↓
+子 agent 返回结果给主会话呈现
 ```
 
 ---
 
-## 可用 Skills（13个）
+## Agent 列表
 
-| 类别 | Skills |
-|------|--------|
-| 数据查询 | data-query |
-| 数据处理 | data-clean, data-quality-check |
-| 数据分析 | data-analysis, model |
-| 输出 | visual, report, dashboard |
-| 安全 | security |
-| 辅助 | danalyzer-guide, context-retriever, insight-gen |
+| Agent | 文件 | 路由优先级 | 触发信号 | 职责 |
+|-------|------|-----------|---------|------|
+| **danalyzer** | `agents/danalyzer.md` | DATA_ANALYSIS | 语义判断：数据查询/统计/分析/对比/建模/看板/报表/图表 | 数据分析专家，执行查询→清洗→建模→可视化→报告全链路 |
+| **research** | *已预留* | RESEARCH | 语义判断：行业研究/竞品分析/白皮书/PPT/综合报告 | 深度研究报告撰写 |
+| **error-handler** | `agents/error-handler.md` | — 异常处理 | 执行中异常触发 | 错误分类/重试/降级/中止决策 |
+
+---
+
+## 路由规则
+
+| 路由目标 | 意图分类 | 说明 |
+|---------|---------|------|
+| Agent: danalyzer | DATA_ANALYSIS | 涉及数据查询/分析/建模/可视化/报表 |
+| Agent: research | RESEARCH | 涉及研究报告/调研/白皮书/PPT |
+| 主会话直接执行 | COMMAND | 以 `/` 开头的斜杠命令 |
+| 主会话正常处理 | GENERAL | 编程/Git/运维/日常对话等非数据类请求 |
+
+---
+
+## 执行流程
+
+Agent 被路由命中后，按以下流程执行数据分析：
+
+```
+需求解析 → 确定分析类型（描述性/诊断性/预测性/规范性/探索性）
+    │
+    ├── 简单任务（≤2 技能）→ 直接执行
+    └── 复杂任务（>2 技能或有依赖）→ 给出执行计划后再执行
+    │
+    ▼
+技能编排 → 按需加载 SKILL.md → 执行
+    │
+    ├── 1. data-query（查询）
+    ├── 2. data-clean（清洗，按需）
+    ├── 3. data-clean（可选质量校验）
+    ├── 4. data-analysis / model（分析/建模）
+    ├── 5. visual / report / dashboard（输出）
+    └── 6. security（安全脱敏，强制）
+    │
+    ▼
+交付 → 数据 + 图表 + 文字洞察
+```
+
+---
+
+## Skill 技能组合示例
+
+| 用户需求 | 技能组合 |
+|----------|----------|
+| 销售周报 | data-query → data-clean → data-analysis → visual → report → security |
+| 用户RFM | data-query → model(rfm) → visual → security |
+| 简单查询 | data-query → security |
+| 漏斗分析 | data-query → model(funnel) → visual → security |
+| 复杂分析 | data-query → data-clean → data-analysis → model → visual → security |
 
 ---
 
@@ -57,20 +118,18 @@ danalyzer-core 是**唯一执行入口**，以 Skill 形式在主会话内运行
 
 ---
 
-## 技能组合示例
+## 核心原则
 
-| 用户需求 | 技能组合 |
-|----------|----------|
-| 销售周报 | data-query → data-clean → data-analysis → visual → report → security |
-| 用户RFM | data-query → model(rfm) → visual → security |
-| 简单查询 | data-query → security |
-| 漏斗分析 | data-query → model(funnel) → visual → security |
+1. **Skill 规则优先** — SKILL.md 中定义的标准优先于通用知识
+2. **不预设固定流程** — 根据需求自主编排技能组合
+3. **可跳过不需要的步骤** — 如不需要清洗则跳过
+4. **安全优先** — 输出前必须 security 处理
+5. **数据 I/O 使用 Connector** — 禁止手写数据读写
 
 ---
 
-## 核心原则
+## 相关文件
 
-1. **不预设固定流程** — 由 danalyzer-core 自主决定
-2. **可跳过不需要的步骤** — 如不需要清洗则跳过
-3. **按需加载** — 只 Read 需要的 SKILL.md
-4. **安全优先** — 输出前必须 security 处理
+- [hooks/session-routing.md](hooks/session-routing.md) — 路由规则（SessionStart 注入）
+- [agents/README.md](agents/README.md) — Agent 体系文档
+- [CLAUDE.md](CLAUDE.md) — 核心规范

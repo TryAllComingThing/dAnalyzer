@@ -1,0 +1,30 @@
+# 配送效率分析场景
+id: log_scn_001
+code: delivery_efficiency
+name: 配送效率分析
+type: scenario
+industry: logistics
+keywords:
+  - 配送效率
+  - 时效分析
+  - 配送时效
+  - 准时率
+description: |
+  配送效率综合分析，包含:
+  - 平均配送时长趋势
+  - 各线路时效对比
+  - 准时率分析
+content:
+  required:
+    - delivery_time
+    - delivery_success_rate
+  optional:
+    - on_time_rate
+    - parcel_volume
+  dimensions:
+    时间维度: [日, 周, 月]
+    线路维度: [线路, 区域, 城市]
+stats:
+  usage_count: 120
+  satisfaction: 0.85
+  updated: 2026-04-26

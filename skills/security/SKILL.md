@@ -58,88 +58,30 @@ Read: skills/security/references/compliance-checklist.md
 
 ---
 
-## 脱敏执行代码
+## 执行指令
 
-### Python 脱敏函数
+**所有数据输出前必须调用 `python scripts/security_scan.py` 进行安全扫描，禁止跳过。**
 
-```python
-import re
+```bash
+# 基础用法：从 stdin 输入数据，输出扫描结果
+echo '[{"name": "张三", "phone": "13812345678"}]' | python scripts/security_scan.py
 
-# P0 检测 — 命中任一即终止
-P0_PATTERNS = {
-    "身份证号": re.compile(r'\d{17}[\dXx]'),
-    "银行卡号": re.compile(r'\d{16,19}'),
-    "密码字段": re.compile(r'password|secret|key|token|api_key', re.IGNORECASE),
-}
+# 从文件读取，保存脱敏后的数据到文件
+python scripts/security_scan.py --input data/output.json --output data/cleaned.json
 
-# P1 脱敏规则
-def mask_phone(text: str) -> str:
-    """手机号: 138****1234"""
-    return re.sub(r'(1[3-9]\d)\d{4}(\d{4})', r'\1****\2', text)
+# 仅检查不输出脱敏数据
+python scripts/security_scan.py --check-only --input data/output.json
 
-def mask_email(text: str) -> str:
-    """邮箱: z***@example.com"""
-    return re.sub(r'([\w.-])[\w.-]*(@[\w.-]+)', r'\1***\2', text)
-
-def mask_id_card(text: str) -> str:
-    """身份证: 110101********1234"""
-    return re.sub(r'(\d{6})\d{8}(\d{4})', r'\1********\2', text)
-
-def mask_name(text: str) -> str:
-    """姓名: 张* / 张**"""
-    return re.sub(r'([一-龥])[一-龥]+', r'\1**', text)
-
-def mask_bank_card(text: str) -> str:
-    """银行卡: **** **** **** 1234"""
-    return re.sub(r'\d{4}\s*\d{4}\s*\d{4}\s*(\d{4})', r'**** **** **** \1', text)
-
-# 字段名 → 脱敏函数映射
-FIELD_MASK_MAP = {
-    "phone": mask_phone,
-    "mobile": mask_phone,
-    "手机": mask_phone,
-    "手机号": mask_phone,
-    "email": mask_email,
-    "邮箱": mask_email,
-    "name": mask_name,
-    "姓名": mask_name,
-    "user_name": mask_name,
-    "id_card": mask_id_card,
-    "身份证": mask_id_card,
-    "bank_card": mask_bank_card,
-    "银行卡": mask_bank_card,
-}
+# 显示详细扫描信息
+python scripts/security_scan.py --input data/output.json --verbose
 ```
 
-### 扫描与脱敏流程
-
-```python
-def security_scan(data: list[dict]) -> dict:
-    """
-    对输出数据执行安全扫描。
-    返回: {"pass": bool, "blocked": list[str], "masked": list[str], "clean_data": list[dict]}
-    """
-    blocked = []
-    masked = []
-
-    for row in data:
-        for key, value in row.items():
-            value_str = str(value) if value else ""
-
-            # Step 1: P0 检测 — 命中立即终止
-            for p0_name, p0_re in P0_PATTERNS.items():
-                if p0_re.search(value_str) or p0_re.search(key):
-                    blocked.append(f"P0-BLOCKED: {p0_name} in field '{key}'")
-                    return {"pass": False, "blocked": blocked, "masked": masked, "clean_data": []}
-
-            # Step 2: P1 脱敏
-            mask_fn = FIELD_MASK_MAP.get(key) or FIELD_MASK_MAP.get(key.lower(), None)
-            if mask_fn:
-                row[key] = mask_fn(value_str)
-                masked.append(key)
-
-    return {"pass": True, "blocked": blocked, "masked": masked, "clean_data": data}
+脚本返回 JSON：
+```json
+{"pass": true, "level": "HIGH", "blocked": [], "masked": ["phone", "name"], "clean_data": [...]}
 ```
+
+**P0 命中时退出码为 2**，数据被拦截，必须向用户提示并移除敏感字段后重新扫描。
 
 ---
 
@@ -163,48 +105,7 @@ def security_scan(data: list[dict]) -> dict:
 | **MEDIUM** | P2 未脱敏 | 自动脱敏后继续，提醒用户 |
 | **LOW** | 无敏感数据 | 放行，记录审计日志 |
 
----
 
-## 执行流程
-
-```
-数据到达 security
-    │
-    ▼
-┌─────────────────────────┐
-│ 1. P0 敏感数据扫描       │
-│    命中 → CRITICAL → 终止 │
-└──────────┬──────────────┘
-           │ 通过
-           ▼
-┌─────────────────────────┐
-│ 2. P1 脱敏处理           │
-│    手机号/姓名/邮箱/地址  │
-└──────────┬──────────────┘
-           │
-           ▼
-┌─────────────────────────┐
-│ 3. P2 脱敏处理           │
-│    IP/账号ID/薪酬        │
-└──────────┬──────────────┘
-           │
-           ▼
-┌─────────────────────────┐
-│ 4. 数据分级检查          │
-│    L3+ → 需审批          │
-└──────────┬──────────────┘
-           │
-           ▼
-┌─────────────────────────┐
-│ 5. 审计日志记录          │
-│    操作时间/类型/结果     │
-└──────────┬──────────────┘
-           │
-           ▼
-      输出脱敏数据
-```
-
----
 
 ## 依赖
 

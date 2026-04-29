@@ -48,7 +48,7 @@
 ## 调用资产
 
 - assets/template/report-template.md
-- skills/visual/comparison-chart.md
+- skills/visual/（对比图）
 
 ## 输出结果
 

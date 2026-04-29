@@ -118,201 +118,22 @@ data/industry/{industry}/
 - related_table: delivery_orders
 ```
 
-## Output Format
+## 执行指令
 
-```json
-{
-  "status": "success",
-  "industry": "logistics",
-  "retrieved": {
-    "indicators": [
-      {
-        "key": "avg_delivery_time",
-        "name": "平均配送时长",
-        "definition": "订单从下达到完成配送的平均时长",
-        "calculation": "AVG(TIMESTAMPDIFF(HOUR, order_time, delivery_time))",
-        "unit": "小时",
-        "relevance": 0.95,
-        "source_file": "indicators/delivery.yaml",
-        "related_table": "delivery_orders"
-      }
-    ],
-    "mappings": [
-      {
-        "table": "delivery_orders",
-        "fields": {
-          "配送时长": "duration_hours",
-          "下单时间": "order_time",
-          "配送完成时间": "delivery_time",
-          "是否准时": "is_on_time",
-          "地区": "region"
-        },
-        "metrics": {
-          "平均配送时长": "AVG(duration_hours)",
-          "准时交付率": "SUM(CASE WHEN is_on_time=1 THEN 1 ELSE 0 END) / COUNT(*)"
-        }
-      }
-    ],
-    "time": {
-      "上月": {
-        "start_date": "2026-03-01",
-        "end_date": "2026-03-31",
-        "granularity": "month"
-      }
-    },
-    "dimensions": [
-      {"key": "region", "name": "地区", "values": null}
-    ]
-  },
-  "context_summary": "已检索到配送时效相关指标：平均配送时长(avg_delivery_time)，使用delivery_orders表，通过region维度分组"
-}
+调用 `python scripts/retrieve_context.py` 执行实际检索，而非模拟检索过程：
+
+```bash
+# 检索行业指标定义和表映射
+python scripts/retrieve_context.py --query "用户输入的关键词" --industry ecommerce
+
+# 输出到文件供后续使用
+python scripts/retrieve_context.py --query "配送时效" --industry logistics --output output/context.json
+
+# 包含相关性评分
+python scripts/retrieve_context.py --query "上月GMV" --industry ecommerce --include_score
 ```
 
-## Usage Example
-
-### Example 1: 配送时效查询
-
-```
-用户输入: "查询上月各地区配送时效"
-
-输入参数:
-{
-  "user_input": "查询上月各地区配送时效",
-  "industry": "logistics"
-}
-
-检索结果:
-- 指标: 平均配送时长 (avg_delivery_time)
-- 表: delivery_orders
-- 字段: duration_hours, region, order_time
-- 时间: 上月 (2026-03-01 ~ 2026-03-31)
-- 维度: 地区 (region)
-
-生成的 SQL 提示:
-SELECT
-    region,
-    AVG(duration_hours) as avg_delivery_time
-FROM delivery_orders
-WHERE order_time >= '2026-03-01' AND order_time < '2026-04-01'
-GROUP BY region
-```
-
-### Example 2: 销售趋势查询
-
-```
-用户输入: "查看本月销售趋势"
-
-输入参数:
-{
-  "user_input": "查看本月销售趋势",
-  "industry": "ecommerce"
-}
-
-检索结果:
-- 指标: 销售额 (sales_amount)
-- 表: orders
-- 字段: order_amount, order_date
-- 时间: 本月
-- 维度: 时间
-```
-
-### Example 3: 生产效率查询
-
-```
-用户输入: "查询本周产能利用率"
-
-输入参数:
-{
-  "user_input": "查询本周产能利用率",
-  "industry": "manufacturing"
-}
-
-检索结果:
-- 指标: 产能利用率 (capacity_utilization)
-- 表: production_orders
-- 字段: actual_quantity, planned_quantity, production_line
-- 时间: 本周
-```
-
-## Index File Format
-
-### indicators/_index.yaml
-
-```yaml
----
-category: delivery
-total_count: 15
----
-
-index:
-  - key: avg_delivery_time
-    name: 平均配送时长
-    keywords: [配送时长, 配送时间, 时效, 多久]
-    related_tables: [delivery_orders]
-
-  - key: on_time_delivery_rate
-    name: 准时交付率
-    keywords: [准时率, 准时交付, 妥投率]
-    related_tables: [delivery_orders]
-
-  - key: delivery_count
-    name: 配送订单量
-    keywords: [配送量, 订单数, 配送单量]
-    related_tables: [delivery_orders]
-
-# 关键词到指标的映射
-keyword_index:
-  配送: [avg_delivery_time, on_time_delivery_rate, delivery_count]
-  时效: [avg_delivery_time, on_time_delivery_rate]
-  订单: [delivery_count]
-  准时: [on_time_delivery_rate]
-```
-
-## Integration with Other Skills
-
-### 在 data-query 中使用
-
-```
-在执行 NL2SQL 之前:
-
-1. 调用 context-retriever skill
-   输入: user_input + industry
-
-2. 获取检索结果:
-   - indicators: 指标定义
-   - mappings: 表字段映射
-   - time: 时间范围
-   - dimensions: 分组维度
-
-3. 将检索结果注入 NL2SQL prompt:
-   - 指标定义 → 告诉 LLM 每个指标的计算方式
-   - 表映射 → 告诉 LLM 如何映射中文到英文字段
-   - 时间范围 → 添加 WHERE 条件
-
-4. 生成准确 SQL
-```
-
-### 在 danalyzer-core 中触发
-
-```
-判断是否需要触发 context-retriever:
-- 用户输入包含行业特征词? (如"配送"、"销售"、"产能")
-- 需要生成 SQL?
-- 尚未加载行业上下文?
-
-满足条件时:
-→ 调用 context-retriever
-→ 将结果传递给 data-query
-```
-
-## Error Handling
-
-| Error | Handling |
-|-------|----------|
-| 行业配置不存在 | 返回错误提示，建议检查行业代码 |
-| 索引文件不存在 | 提示需要创建索引文件 |
-| 检索无结果 | 返回空结果，可使用通用查询 |
-| 指标定义不完整 | 返回部分信息 + 警告 |
+脚本返回 JSON，包含 `indicators`（匹配的指标定义、公式、表字段映射）和 `scenarios`（场景模板）。
 
 ## Dependencies
 
