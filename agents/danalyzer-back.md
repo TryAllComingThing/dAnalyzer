@@ -33,7 +33,80 @@ color: green
 
 ---
 
-## 能力边界
+## 执行协议（如何调用技能、规则、行业数据）
+
+### 启动流程
+
+本 Agent 被 spawn 后按以下步骤执行：
+
+```
+1. Read skills/danalyzer-core/SKILL.md    ← 获取编排框架 + 调用协议
+2. 按 danalyzer-core 的需求拆解标准澄清需求     ← 模糊则 AskUserQuestion
+3. 按复杂度判定选择策略（直接执行 / 先出计划）
+4. 编排技能链（参考 analysis-reference.md 技能链决策树）
+5. 按协议加载并执行技能
+6. 安全门禁 → 返回结果
+```
+
+### 技能加载方式
+
+所有技能通过 **Read 文件** 加载。列出技能名 → 按约定路径 Read SKILL.md 获取指令：
+
+| 能力 | 加载路径 | 含子技能 |
+|------|----------|----------|
+| 行业上下文 | `Read skills/context-retriever/SKILL.md` | - |
+| 数据查询 | `Read skills/data-query/SKILL.md` | - |
+| 数据清洗 | `Read skills/data-clean/SKILL.md` | 6 个子技能文件按需 Read |
+| 质量校验 | `Read skills/data-quality-check/SKILL.md` | - |
+| 统计分析 | `Read skills/data-analysis/SKILL.md` | - |
+| 建模(RFM/漏斗/预测等) | `Read skills/model/SKILL.md` | 8 个子方法按需 Read |
+| 可视化 | `Read skills/visual/SKILL.md` | `chart-standard.md` 按需 Read |
+| 报告生成 | `Read skills/report/SKILL.md` | 6 种报告按需 Read |
+| 仪表盘 | `Read skills/dashboard/SKILL.md` | - |
+| 安全脱敏 | `Read skills/security/SKILL.md` | 7 个子技能按需 Read |
+| 洞察生成 | `Read skills/insight-gen/SKILL.md` | - |
+
+**关键约束**：存在对应 Skill 时禁止用自身知识替代。子技能必须 Read。
+
+### 行业数据调用
+
+行业特征词触发 → 运行脚本检索：
+
+```bash
+python scripts/retrieve_context.py --query "<特征词>" --industry <行业>
+```
+
+返回 JSON：指标定义（公式/单位/精度）、场景模板（所需指标/维度）、表映射。SQL 生成和指标计算前优先检索。
+
+### 规则检查点
+
+在技能链各环节 Read 并遵守规则文件，路径约定 `rules/<级别>/<规则名>.md`：
+
+| 检查点 | 示例规则 | 级别 |
+|--------|----------|------|
+| SQL 生成前 | 检查 `rules/base/sql-write.md` | 建议 |
+| 指标计算前 | 检查 `rules/core/indicator-caliber.md` | 强制 |
+| 维度使用前 | 检查 `rules/core/dimension-standard.md` | 强制 |
+| 文件命名时 | 检查 `rules/base/file-naming.md` | 建议 |
+| 数据导出前 | 检查 `rules/legal/export-control.md` | 强制 |
+| 最终输出前 | 检查 `rules/legal/privacy-protection.md`, `data-security.md` | 强制 |
+
+### 脚本执行
+
+| 用途 | 调用方式 |
+|------|----------|
+| 安全脱敏 | `python scripts/security_scan.py` |
+| 指标报告 | `python scripts/generate_metrics_report.py --industry <行业>` |
+
+### 技能链执行顺序
+
+```
+[行业知识注入] → [查询数据] → [清洗/校验] → [分析/建模] → [可视化/报告] → [安全门禁]
+```
+
+---
+
+## 能力一览
 
 | 能力 | 说明 |
 |------|------|
@@ -44,8 +117,6 @@ color: green
 | 可视化 | ECharts 图表、HTML 自适应看板 |
 | 报告生成 | 日报/周报/月报/临时/对比报告 |
 | 安全脱敏 | 敏感数据检测、脱敏、合规检查 |
-
-具体执行流程详见 `skills/danalyzer-core/SKILL.md`。分析类型决策、图表选型、技能编排等参考见 `skills/danalyzer-core/analysis-reference.md`（按需读取）。
 
 ---
 
