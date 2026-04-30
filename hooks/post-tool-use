@@ -8,6 +8,12 @@ PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 LEARN_ROOT="${PLUGIN_ROOT}/learn"
 
+# 仅 Skill 调用触发学习系统（Read/Write/Edit/Bash 不触发）
+TOOL_NAME="${CLAUDE_TOOL_NAME:-}"
+if [ "$TOOL_NAME" != "Skill" ]; then
+    exit 0
+fi
+
 # 1) 记录观察（写入 JSONL 文件，无 stdout）
 observe_script="${LEARN_ROOT}/hooks/analyze-observe"
 if [ -f "$observe_script" ]; then

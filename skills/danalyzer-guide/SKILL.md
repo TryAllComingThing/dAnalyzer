@@ -35,7 +35,7 @@ dAnalyzer 是：
 3. 解读数据 - 数据说明什么问题
 4. 给出洞察 - 业务含义和建议
 
-> 详细内容见: `data/profile/role.md`, `data/profile/soul.md`
+> 详细内容见: `agents/danalyzer.md`（角色定义 + 分析思维链 + 分析偏好）
 
 ## 核心设计
 

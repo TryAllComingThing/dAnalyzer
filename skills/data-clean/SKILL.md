@@ -164,88 +164,15 @@ df.drop_duplicates(subset=['order_id'], keep='last', inplace=True)
 |------|------|------|------|
 | data_source | object | 数据源信息 | ✅ |
 | data_source.type | string | database/file | ✅ |
-| data_source.path | string | 文件路径（文件模式） | ❌ |
-| data_source.table | string | 表名（数据库模式） | ❌ |
 | cleaning_rules | object | 清洗规则配置 | ❌ |
-| output_mode | string | 输出模式：sql/memory | ❌ |
-
-### 清洗规则配置示例
-
-```yaml
-cleaning_rules:
-  null_handling:
-    sales_amount: mean  # 均值填充
-    customer_name: "未知"  # 常量填充
-    order_date: forward  # 向前填充
-  outlier_handling:
-    sales_amount:
-      method: 3sigma
-      action: remove  # remove/mark/clip
-  deduplication:
-    key: order_id
-    keep: last  # first/last
-  format_standardize:
-    date: YYYY-MM-DD
-    decimal: 2
-```
 
 ---
 
 ## 输出结果
 
-### SQL模式输出
-
-```yaml
-output:
-  type: sql
-  sql: "WITH cleaned AS (...) SELECT * FROM cleaned WHERE rn = 1"
-  explanation: "空值填充+异常值处理+去重"
-  estimated_rows: 10000
-```
-
-### 内存模式输出
-
-```yaml
-output:
-  type: memory
-  data: DataFrame  # 清洗后的数据
-  stats:
-    total_rows: 10000
-    null_filled: 50
-    outliers_removed: 30
-    duplicates_removed: 10
-  report: "清洗报告"
-```
-
----
-
-## 决策逻辑
-
-```python
-def select_cleaning_mode(data_source, data_info):
-    """
-    自动选择最佳清洗模式
-    """
-    # 模式1: 数据库 → SQL模式
-    if data_source.type == "database":
-        return {
-            "mode": "sql",
-            "reason": "数据库数据推荐在SQL层处理，性能最优"
-        }
-
-    # 模式2: 小文件 → 内存模式
-    if data_source.type == "file" and data_info.get("rows", 0) < 100_000:
-        return {
-            "mode": "memory",
-            "reason": "小文件推荐在内存中处理，速度快"
-        }
-
-    # 模式3: 大文件 → 分块处理
-    return {
-        "mode": "chunked",
-        "reason": "大文件建议分块处理或导入临时表"
-    }
-```
+清洗结果类型根据模式确定：
+- **SQL 模式**：返回清洗后 SQL 字符串及清洗说明
+- **内存模式**：返回清洗后数据集 + 清洗统计（填充数/剔除数/去重数）
 
 ---
 
@@ -275,15 +202,6 @@ def select_cleaning_mode(data_source, data_info):
 ```
 data-query → 返回数据源信息 → data-clean → 返回清洗后的数据/SQL
 ```
-
----
-
-## 依赖配置
-
-- connectors/datawarehouse/* - 数据库连接
-- connectors/tool/* - 文件读取
-- rules/core/indicator-caliber.md - 指标口径
-- data/indicator/* - 指标定义
 
 ---
 

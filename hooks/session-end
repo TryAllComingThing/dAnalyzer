@@ -10,7 +10,7 @@ PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 check_uncommitted() {
     local data_dir="${PLUGIN_ROOT}/data"
     if [ -d "$data_dir" ]; then
-        local recent_files=$(find "$data_dir" -name "*.csv" -o -name "*.xlsx" -o -name "*.json" -mmin -60 2>/dev/null | wc -l | tr -d ' ')
+        local recent_files=$(find "$data_dir" -maxdepth 3 \( -name "*.csv" -o -name "*.xlsx" -o -name "*.json" \) -mmin -60 2>/dev/null | wc -l | tr -d ' ')
         if [ "$recent_files" -gt 0 ]; then
             echo "#[dAnalyzer] Warning: $recent_files data files modified in last hour"
         fi

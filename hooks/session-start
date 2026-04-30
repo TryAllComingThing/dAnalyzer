@@ -6,7 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# 加载精简路由规则（来自 hooks/session-routing.md）
+# 加载路由规则（来自 hooks/session-routing.md）
 routing_content=$(cat "${PLUGIN_ROOT}/hooks/session-routing.md" 2>&1 || echo "")
 
 # 加载学习系统本能索引（以纯文本形式获取，避免 JSON 嵌套）

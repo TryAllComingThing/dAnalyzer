@@ -1,9 +1,11 @@
 ---
 name: data-analysis
-description: 通用数据分析技能，支持描述性统计、趋势分析、相关性分析、分布分析、假设检验
+description: 数据分析参考 — 描述性统计、趋势分析、相关性分析、分布分析的方法与公式
 ---
 
 # 数据分析技能 (Data Analysis)
+
+> **使用说明**：本 Skill 定义标准统计分析方法与公式。实际分析执行委托给 industry-specific analyzer（如 industry_analyzers.py），它们可能根据业务场景使用简化聚合。本 Skill 的公式作为质量参考和异常检测指南。
 
 ## When to Activate
 

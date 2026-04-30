@@ -62,21 +62,13 @@ python scripts/execute_query.py --source mysql --query "SELECT * FROM orders LIM
 python scripts/execute_query.py --source csv --path data/sample.csv --output output/query_result.json
 ```
 
-## 依赖配置
+## 依赖
 
-### Connector 模块（强制使用）
+数据查询统一通过 `python scripts/execute_query.py` 执行。该脚本接口见 connectors/README.md。
 
-| 数据源 | 脚本参数 | 模块文件 |
-|--------|---------|----------|
-| CSV | `--source csv` | connectors/tool/csv_connector.py |
-| JSON | `--source json` | connectors/tool/json_connector.py |
-| Excel | `--source excel` | connectors/tool/excel_connector.py |
-| MySQL | `--source mysql` | connectors/datawarehouse/mysql.py |
-| ClickHouse | `--source clickhouse` | connectors/datawarehouse/clickhouse.py |
-| Hive | `--source hive` | connectors/datawarehouse/hive.py |
-| PG | `--source postgres` | connectors/datawarehouse/postgres.py |
+管道的实际查询逻辑在 `scripts/ecommerce_pipeline.py` 的 step3 中实现，使用 csv.DictReader 读取本地 CSV 数据后由 industry-specific analyzer 处理。
 
-### 其他依赖
+### 指标口径参考
 
 - 数据资产: data/indicator/core-indicator-dict.md（指标口径）
 - 口径规则: rules/core/indicator-caliber.md

@@ -50,14 +50,6 @@ get_observation_type() {
                     ;;
             esac
             ;;
-        Read)
-            # 检查是否读取数据相关文件
-            if echo "$input" | grep -qi "data\|query\|sql"; then
-                echo "query"
-            else
-                echo "general"
-            fi
-            ;;
         *)
             echo "general"
             ;;
@@ -126,13 +118,6 @@ record_observation() {
 EOF
 )
             ;;
-        Read)
-            local file_path=$(echo "$TOOL_INPUT" | grep -oP '(?<="file_path":")[^"]+' | head -1 || echo "unknown")
-            obs_data=$(cat <<EOF
-{"timestamp":"$timestamp","type":"$obs_type","session":"$SESSION_ID","tool":"$TOOL_NAME","file":"$file_path"}
-EOF
-)
-            ;;
         *)
             obs_data=$(cat <<EOF
 {"timestamp":"$timestamp","type":"$obs_type","session":"$SESSION_ID","tool":"$TOOL_NAME"}
@@ -144,31 +129,6 @@ EOF
     # 写入观察文件
     local obs_file="${OBS_DIR}/${SESSION_ID}.jsonl"
     echo "$obs_data" >> "$obs_file"
-
-    # 更新索引
-    update_index
-}
-
-# 更新索引
-update_index() {
-    local index_file="${LEARN_ROOT}/data/observations/index.json"
-    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-    mkdir -p "$(dirname "$index_file")"
-
-    if [ -f "$index_file" ]; then
-        # 检查会话是否已存在
-        if ! grep -q "\"$SESSION_ID\"" "$index_file"; then
-            # 追加新会话
-            local temp_file=$(mktemp)
-            sed "s/\"sessions\":\[/\"sessions\":[\"$SESSION_ID\",/" "$index_file" > "$temp_file" || echo "{\"sessions\":[\"$SESSION_ID\"],\"last_updated\":\"$timestamp\"}" > "$index_file"
-            mv "$temp_file" "$index_file"
-        fi
-        # 更新最后时间
-        sed -i "s/\"last_updated\": \"[^\"]*\"/\"last_updated\": \"$timestamp\"/" "$index_file"
-    else
-        echo "{\"sessions\":[\"$SESSION_ID\"],\"last_updated\":\"$timestamp\"}" > "$index_file"
-    fi
 }
 
 # ============================================
@@ -176,8 +136,8 @@ update_index() {
 # ============================================
 
 main() {
-    # 只有 Skill 或 Read 调用才记录
-    if [ "$TOOL_NAME" = "Skill" ] || [ "$TOOL_NAME" = "Read" ]; then
+    # post-tool-use 已内置 Skill-only 守卫，至此仅处理 Skill 调用
+    if [ "$TOOL_NAME" = "Skill" ]; then
         record_observation
     fi
 }
