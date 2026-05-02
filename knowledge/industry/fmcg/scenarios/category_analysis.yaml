@@ -1,0 +1,36 @@
+# 品类分析
+
+code: category_analysis
+name: 品类分析
+industry: fmcg
+
+keywords:
+  - 品类
+  - 类目
+  - 分类
+  - 品类结构
+  - 品类占比
+
+description: |
+  快消品类维度分析，包含:
+  - 各品类销售额/量排名
+  - 品类占比结构
+  - 品类增长贡献度
+  - 品类动销率对比
+
+content:
+  required:
+    - sales_amount
+    - order_count
+    - sku_count
+  optional:
+    - sell_through_rate
+    - conversion_rate
+  dimensions:
+    品类: [各品类/类目]
+    时间: [月, 季度, 年]
+
+stats:
+  usage_count: 0
+  satisfaction: 0.88
+  updated: 2026-05-01

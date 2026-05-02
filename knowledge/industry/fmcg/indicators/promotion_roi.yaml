@@ -1,0 +1,23 @@
+# 促销ROI
+
+code: promotion_roi
+name: 促销ROI
+industry: fmcg
+
+keywords:
+  - 促销ROI
+  - 促销回报
+  - 活动ROI
+  - 营销ROI
+  - 投入产出比
+
+description: 促销带来的增量销售额与促销成本的比值。ROI > 1说明促销有效。快消行业促销ROI通常在1.5-3之间。
+
+definition:
+  formula: (SUM(promotion_sales) - SUM(baseline_sales)) / SUM(promotion_cost)
+  unit: 倍
+  precision: 2
+
+stats:
+  importance: 0.86
+  updated: 2026-05-01

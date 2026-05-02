@@ -1,0 +1,24 @@
+# 活跃用户数
+
+code: active_user_count
+name: 活跃用户数
+industry: fmcg
+
+keywords:
+  - 活跃用户
+  - 活跃
+  - 日活
+  - 月活
+  - DAU
+  - MAU
+
+description: 统计周期内有购买行为的用户数。DAU/MAU 比率是衡量用户粘性的关键指标。
+
+definition:
+  formula: COUNT(DISTINCT user_id WHERE order_count > 0)
+  unit: 人
+  precision: 0
+
+stats:
+  importance: 0.90
+  updated: 2026-05-01

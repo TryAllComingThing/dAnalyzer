@@ -1,33 +1,21 @@
-# 通用订单ID指标
+# 订单ID
 
-id: base_004
 code: order_id
 name: 订单ID
-type: indicator
-industry: _base
+industry: fmcg
 
 keywords:
-  - 订单ID
-  - 订单编号
+  - 订单
+  - 交易
   - order_id
-  - transaction_id
 
-description: |
-  通用订单/交易标识字段。
-  用于订单相关的数据关联和分析。
+description: 订单唯一标识，用于订单统计和关联分析。
 
 definition:
-  formula: order_id
-  aggregation: COUNT
+  formula: COUNT(DISTINCT order_id)
   unit: 单
   precision: 0
 
-mapping:
-  table: "orders, transactions"
-  field: order_id
-  notes: "订单表主键"
-
 stats:
-  access_count: 600
-  importance: 0.9
-  updated: 2026-04-26
+  importance: 0.90
+  updated: 2026-05-01

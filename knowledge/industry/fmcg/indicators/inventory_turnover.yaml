@@ -1,0 +1,23 @@
+# 库存周转率
+
+code: inventory_turnover
+name: 库存周转率
+industry: fmcg
+
+keywords:
+  - 库存周转
+  - 周转率
+  - 库存效率
+  - 库存周转率
+  - turn
+
+description: 销售成本 / 平均库存金额，衡量库存管理效率。快消行业周转率高于耐用品，饮料/食品通常年周转12-24次。
+
+definition:
+  formula: SUM(cost_amount) / AVG(inventory_value)
+  unit: 次
+  precision: 2
+
+stats:
+  importance: 0.88
+  updated: 2026-05-01

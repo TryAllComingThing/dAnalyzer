@@ -1,0 +1,24 @@
+# 客户终身价值
+
+code: clv
+name: 客户终身价值
+industry: fmcg
+
+keywords:
+  - 客户价值
+  - CLV
+  - LTV
+  - 终身价值
+  - 客户贡献
+  - 用户价值
+
+description: 一个客户在整个生命周期内预期贡献的总利润。CLV = 客单价 × 年均购买次数 × 平均留存年数 × 毛利率。快消行业通常按品类计算。
+
+definition:
+  formula: avg_order_value * annual_order_frequency * avg_retention_years * gross_margin_rate
+  unit: 元
+  precision: 2
+
+stats:
+  importance: 0.85
+  updated: 2026-05-01

@@ -1,0 +1,36 @@
+# 渠道分析
+
+code: channel_analysis
+name: 渠道分析
+industry: fmcg
+
+keywords:
+  - 渠道
+  - 经销商
+  - 终端
+  - 铺货
+  - 通路
+
+description: |
+  快消渠道维度分析，包含:
+  - 各渠道销售额/量对比
+  - 渠道占比结构
+  - 渠道动销率
+  - 渠道效能评估
+
+content:
+  required:
+    - sales_amount
+    - order_count
+  optional:
+    - sell_through_rate
+    - sku_count
+    - conversion_rate
+  dimensions:
+    渠道: [线上, 线下, 经销商, 直营, 特通]
+    区域: [全国, 大区, 省份]
+
+stats:
+  usage_count: 0
+  satisfaction: 0.85
+  updated: 2026-05-01

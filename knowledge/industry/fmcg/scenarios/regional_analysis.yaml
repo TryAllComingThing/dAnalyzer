@@ -1,0 +1,41 @@
+# 区域分析
+
+code: regional_analysis
+name: 区域分析
+industry: fmcg
+
+keywords:
+  - 区域
+  - 地区
+  - 城市
+  - 省份
+  - 大区
+  - 地域
+
+description: |
+  区域维度销售与渠道分析，包含:
+  - 各区域销售额/量排名
+  - 区域增长潜力评估
+  - 区域终端覆盖率
+  - 区域经销商效能
+  - 区域品类偏好差异
+
+content:
+  required:
+    - sales_amount
+    - order_count
+    - terminal_coverage_rate
+  optional:
+    - distributor_count
+    - distribution_penetration
+    - repurchase_rate
+  dimensions:
+    区域: [华东, 华南, 华北, 华中, 西南, 西北, 东北]
+    省市: [各省/直辖市]
+    渠道: [各渠道]
+    时间: [月, 季度, 年]
+
+stats:
+  usage_count: 0
+  satisfaction: 0.85
+  updated: 2026-05-01

@@ -1,0 +1,23 @@
+# 准时交付率
+
+code: delivery_on_time_rate
+name: 准时交付率
+industry: fmcg
+
+keywords:
+  - 准时交付
+  - 准时率
+  - 按时送达
+  - 配送时效
+  - OTD
+
+description: 准时交付订单数占总订单数的比例。衡量供应链执行效率和物流服务水平。
+
+definition:
+  formula: COUNT(order_id WHERE delivery_time <= promise_time) / COUNT(DISTINCT order_id) * 100
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.78
+  updated: 2026-05-01

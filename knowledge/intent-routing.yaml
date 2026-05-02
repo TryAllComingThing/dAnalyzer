@@ -1,0 +1,260 @@
+# 意图路由映射 — FMCG 快消行业
+# 将用户自然语言意图映射为: indicators → scenarios → models → skill_chain
+# 用于 LLM 语义转写时的结构化引导 + 校验层 code 存在性验证
+#
+# available_industries 由 registry_scanner.py 动态扫描覆盖。
+# 下方为静态兜底，新增行业无需手动更新此列表。
+
+available_industries:
+  - code: fmcg
+    name: 快消
+    trigger_keywords: [销售, 订单, GMV, SKU, 品类, 渠道, 动销, 库存周转, 铺货, 经销商, 终端, 复购, 促销, 新品, 转化, 客单价, 用户, 毛利, 净利, 退货, 缺货, 连带, 留存, 折扣, 优惠券, 获客, 区域, 购物篮, 库存]
+
+# ─── 意图定义 ───
+# 从上到下优先级递减。匹配到 negative_keywords 则跳过当前 intent。
+
+intents:
+  # ── 描述性分析 ──
+  - id: sales_overview
+    analysis_type: descriptive
+    keywords: [销售, 营收, GMV, 收入, 业绩, 卖了, 卖得, 销售额, 销量]
+    negative_keywords: [下降, 下滑, 异常, 原因, 归因, 为什么, 不好, 差]
+    default_indicators: [sales_amount, order_count]
+    default_scenarios: [sales_trend]
+    models: []
+    skill_chain: [data-query, data-analysis, visual, security]
+
+  - id: user_overview
+    analysis_type: descriptive
+    keywords: [用户, 消费者, 会员]
+    negative_keywords: [流失, 留存, 复购, 分群, 画像, 价值, RFM]
+    default_indicators: [user_id, order_count]
+    default_scenarios: [user_analysis]
+    models: []
+    skill_chain: [data-query, data-analysis, visual, security]
+
+  - id: order_overview
+    analysis_type: descriptive
+    keywords: [订单, 订单量, 订单数, 成交量]
+    negative_keywords: [转化, 漏斗, 退款, 退货]
+    default_indicators: [order_count, sales_amount]
+    default_scenarios: [sales_trend]
+    models: []
+    skill_chain: [data-query, data-analysis, visual, security]
+
+  - id: category_overview
+    analysis_type: descriptive
+    keywords: [品类, 类目, 分类, 各品类, 品类结构]
+    negative_keywords: [下降, 原因, 为什么]
+    default_indicators: [sales_amount, order_count, sku_count]
+    default_scenarios: [category_analysis]
+    models: []
+    skill_chain: [data-query, data-analysis, visual, security]
+
+  - id: channel_overview
+    analysis_type: descriptive
+    keywords: [渠道, 经销商, 终端, 通路, 各渠道]
+    negative_keywords: [下降, 原因, 为什么]
+    default_indicators: [sales_amount, order_count]
+    default_scenarios: [channel_analysis]
+    models: []
+    skill_chain: [data-query, data-analysis, visual, security]
+
+  # ── 诊断性分析 ──
+  - id: sales_diagnostic
+    analysis_type: diagnostic
+    keywords: [表现不好, 下降, 下滑, 异常, 什么原因, 为什么, 归因, 哪.+不好, 哪.+差, 怎么了, 出问题]
+    default_indicators: [sales_amount, order_count, conversion_rate]
+    default_scenarios: [sales_trend]
+    models: [attribution-model]
+    skill_chain: [data-query, data-clean, data-analysis, model, visual, report, security]
+
+  - id: category_diagnostic
+    analysis_type: diagnostic
+    keywords: [品类下降, 品类差, 品类异常, 品类表现, 哪个品类不好]
+    default_indicators: [sales_amount, order_count, sell_through_rate]
+    default_scenarios: [category_analysis]
+    models: [attribution-model]
+    skill_chain: [data-query, data-clean, data-analysis, model, visual, report, security]
+
+  - id: conversion_diagnostic
+    analysis_type: diagnostic
+    keywords: [转化下降, 转化差, 转化低, 转化异常]
+    default_indicators: [conversion_rate, order_count]
+    default_scenarios: [sales_trend]
+    models: [attribution-model, funnel-model]
+    skill_chain: [data-query, data-clean, data-analysis, model, visual, report, security]
+
+  # ── 预测性分析 ──
+  - id: sales_forecast
+    analysis_type: predictive
+    keywords: [预测, 预估, 预计, 趋势预判, 未来, 会.+多少, 将.+多少]
+    default_indicators: [sales_amount, order_count]
+    default_scenarios: [sales_trend]
+    models: [prediction-model]
+    skill_chain: [data-query, data-clean, model, visual, security]
+
+  # ── 规范性分析 ──
+  - id: strategy_advice
+    analysis_type: prescriptive
+    keywords: [建议, 优化, 策略, 应该, 怎么办, 方案, 如何提升, 如何改善, 如何降低]
+    default_indicators: [sales_amount, conversion_rate, sell_through_rate]
+    default_scenarios: [sales_trend, category_analysis, channel_analysis]
+    models: [segmentation-model, scoring-model]
+    skill_chain: [data-query, data-clean, data-analysis, model, visual, report, security]
+
+  # ── 探索性分析 ──
+  - id: user_segmentation
+    analysis_type: exploratory
+    keywords: [分群, 客群, 用户画像, 用户分层, 聚类, 打标签]
+    default_indicators: [order_count, sales_amount, user_id]
+    default_scenarios: [user_analysis]
+    models: [segmentation-model, scoring-model]
+    skill_chain: [data-query, data-clean, data-analysis, model, visual, insight-gen, security]
+
+  - id: rfm_analysis
+    analysis_type: exploratory
+    keywords: [RFM, 用户价值, 高价值, 流失风险, 沉睡用户]
+    default_indicators: [order_count, sales_amount, user_id]
+    default_scenarios: [user_analysis]
+    models: [scoring-model]
+    skill_chain: [data-query, model, visual, security]
+
+  - id: funnel_analysis
+    analysis_type: exploratory
+    keywords: [漏斗, 转化路径, 流失环节, 转化流程, 用户旅程]
+    default_indicators: [conversion_rate, order_count]
+    default_scenarios: [user_analysis]
+    models: [funnel-model]
+    skill_chain: [data-query, model, visual, security]
+
+  - id: cohort_analysis
+    analysis_type: exploratory
+    keywords: [留存, 同期群, 回访, 复购, 回头客, cohort]
+    default_indicators: [user_id, order_count]
+    default_scenarios: [user_analysis]
+    models: [cohort-model]
+    skill_chain: [data-query, data-clean, model, visual, security]
+
+  - id: sku_health
+    analysis_type: exploratory
+    keywords: [动销, SKU健康, 品项分析, 滞销, 畅销, 长尾]
+    default_indicators: [sell_through_rate, sku_count, sales_amount]
+    default_scenarios: [category_analysis]
+    models: [segmentation-model]
+    skill_chain: [data-query, data-clean, data-analysis, model, visual, security]
+
+  # ── 新增：利润分析 ──
+  - id: profit_overview
+    analysis_type: descriptive
+    keywords: [毛利, 毛利率, 净利, 净利润, 利润, 盈利, 赚钱]
+    negative_keywords: [下降, 下滑, 异常, 原因, 为什么, 亏损]
+    default_indicators: [gross_profit, gross_margin_rate, net_profit, sales_amount]
+    default_scenarios: [profit_analysis]
+    models: []
+    skill_chain: [data-query, data-analysis, visual, security]
+
+  - id: profit_diagnostic
+    analysis_type: diagnostic
+    keywords: [毛利下降, 利润下滑, 亏损, 不赚钱, 毛利异常, 毛利低]
+    default_indicators: [gross_profit, gross_margin_rate, net_profit, net_margin_rate, discount_rate]
+    default_scenarios: [profit_analysis, category_analysis]
+    models: [attribution-model]
+    skill_chain: [data-query, data-clean, data-analysis, model, visual, report, security]
+
+  # ── 新增：促销分析 ──
+  - id: promotion_effect
+    analysis_type: diagnostic
+    keywords: [促销, 活动, 打折, 满减, 大促, "618", 双11, 活动效果, 促销ROI]
+    default_indicators: [promotion_roi, sales_amount, order_count, coupon_usage_rate]
+    default_scenarios: [promotion_analysis]
+    models: [attribution-model]
+    skill_chain: [data-query, data-clean, data-analysis, model, visual, report, security]
+
+  # ── 新增：库存分析 ──
+  - id: inventory_health
+    analysis_type: diagnostic
+    keywords: [库存, 存货, 周转, 缺货, 滞销, 临期, 库存周转]
+    negative_keywords: [预测, 预估]
+    default_indicators: [inventory_turnover, inventory_days, out_of_stock_rate, sell_through_rate]
+    default_scenarios: [inventory_analysis]
+    models: [prediction-model]
+    skill_chain: [data-query, data-clean, data-analysis, model, visual, report, security]
+
+  # ── 新增：客户价值分析 ──
+  - id: customer_value
+    analysis_type: exploratory
+    keywords: [客户价值, CLV, LTV, 用户价值, 客户贡献, 高价值客户]
+    default_indicators: [clv, repurchase_rate, avg_order_value, active_user_count]
+    default_scenarios: [customer_value_analysis]
+    models: [segmentation-model, scoring-model]
+    skill_chain: [data-query, data-clean, data-analysis, model, visual, insight-gen, security]
+
+  # ── 新增：退货分析 ──
+  - id: return_diagnostic
+    analysis_type: diagnostic
+    keywords: [退货, 退款, 退换, 退单, 售后, 退货率]
+    default_indicators: [return_rate, order_cancel_rate, sales_amount]
+    default_scenarios: [return_analysis]
+    models: [attribution-model]
+    skill_chain: [data-query, data-clean, data-analysis, model, visual, report, security]
+
+  # ── 新增：区域分析 ──
+  - id: regional_overview
+    analysis_type: descriptive
+    keywords: [区域, 地区, 城市, 省份, 大区, 地域, 各区域]
+    negative_keywords: [下降, 原因, 为什么]
+    default_indicators: [sales_amount, order_count, terminal_coverage_rate]
+    default_scenarios: [regional_analysis]
+    models: []
+    skill_chain: [data-query, data-analysis, visual, security]
+
+  # ── 新增：新品分析 ──
+  - id: new_product_tracking
+    analysis_type: descriptive
+    keywords: [新品, 新品上市, 新品表现, 新品跟踪, 上市]
+    negative_keywords: [下降, 原因]
+    default_indicators: [new_sku_ratio, sell_through_rate, sales_amount, distribution_penetration]
+    default_scenarios: [new_product_analysis]
+    models: []
+    skill_chain: [data-query, data-analysis, visual, security]
+
+  # ── 新增：购物篮分析 ──
+  - id: market_basket
+    analysis_type: exploratory
+    keywords: [购物篮, 关联, 搭售, 连带, 交叉销售, 捆绑, 组合购买]
+    default_indicators: [avg_basket_size, sku_count, order_id]
+    default_scenarios: [market_basket_analysis]
+    models: []
+    skill_chain: [data-query, data-analysis, model, visual, insight-gen, security]
+
+# ─── 分析类型 → 默认技能链 ───
+analysis_type_chains:
+  descriptive: [data-query, data-analysis, visual, security]
+  diagnostic: [data-query, data-clean, data-analysis, model, visual, report, security]
+  predictive: [data-query, data-clean, model, visual, security]
+  prescriptive: [data-query, data-clean, data-analysis, model, visual, report, security]
+  exploratory: [data-query, data-clean, data-analysis, model, visual, insight-gen, security]
+
+# ─── 模型文件映射 ───
+model_files:
+  attribution-model: knowledge/model/attribution-model.md?   # 待创建
+  cohort-model: knowledge/model/cohort-model.md
+  prediction-model: knowledge/model/prediction-model.md
+  scoring-model: knowledge/model/scoring-model.md
+  segmentation-model: knowledge/model/segmentation-model.md
+  funnel-model: null   # 由 skills/model/funnel-model.md 覆盖
+  rfm-model: null      # 由 skills/model/rfm-model.md 覆盖
+
+# ─── 转写输出 schema ───
+output_schema:
+  industry: string       # 行业代码
+  intent_id: string      # 命中的 intent id（可为空）
+  analysis_type: string  # descriptive/diagnostic/predictive/prescriptive/exploratory
+  confidence: float      # 0.0-1.0，LLM 自评置信度
+  indicators: [string]   # indicator code 列表
+  scenarios: [string]    # scenario code 列表
+  models: [string]       # model 文件名列表
+  dimensions: [string]   # 分析维度
+  skill_chain: [string]  # skill 名称列表
+  reasoning: string      # 一句话解释转写逻辑（用于调试）

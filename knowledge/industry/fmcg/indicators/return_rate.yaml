@@ -1,0 +1,22 @@
+# 退货率
+
+code: return_rate
+name: 退货率
+industry: fmcg
+
+keywords:
+  - 退货率
+  - 退货
+  - 退款率
+  - 退换货
+
+description: 退货订单数占总订单数的比例。快消行业通常低于5%，食品饮料低于2%。高退货率可能反映质量问题或描述不符。
+
+definition:
+  formula: COUNT(order_id WHERE status IN ('已退货','已退款')) / COUNT(DISTINCT order_id) * 100
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.82
+  updated: 2026-05-01

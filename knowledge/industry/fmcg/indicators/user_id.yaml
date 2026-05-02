@@ -1,34 +1,22 @@
-# 通用用户ID指标
+# 用户ID
 
-id: base_003
 code: user_id
 name: 用户ID
-type: indicator
-industry: _base
+industry: fmcg
 
 keywords:
-  - 用户ID
-  - 用户编号
+  - 用户
+  - 消费者
+  - 会员
   - user_id
-  - customer_id
-  - member_id
 
-description: |
-  通用用户标识字段，用于用户相关的数据关联。
-  支持跨表用户行为分析。
+description: 消费者唯一标识，用于用户行为分析和复购统计。
 
 definition:
-  formula: user_id
-  aggregation: COUNT(DISTINCT)
-  unit: 个
+  formula: COUNT(DISTINCT user_id)
+  unit: 人
   precision: 0
 
-mapping:
-  table: "*"
-  field: user_id
-  notes: "用户唯一标识"
-
 stats:
-  access_count: 800
   importance: 0.95
-  updated: 2026-04-26
+  updated: 2026-05-01

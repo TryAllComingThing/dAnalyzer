@@ -1,61 +1,54 @@
-# 基础行业配置
+# 快消行业配置 (FMCG)
 
-> 所有行业共用的配置项
+> 快消品行业数据分析配置 — 覆盖食品饮料、日化、个护、烟酒等
+
+## 行业定义
+
+```yaml
+industry:
+  code: fmcg
+  name: 快消
+  name_en: Fast Moving Consumer Goods
+  trigger_keywords:
+    - 销售
+    - 订单
+    - GMV
+    - SKU
+    - 品类
+    - 渠道
+    - 动销
+    - 库存周转
+    - 铺货
+    - 经销商
+    - 终端
+    - 复购
+    - 促销
+    - 新品
+    - 毛利
+    - 净利
+    - 客单价
+    - 退货
+    - 缺货
+    - 连带
+    - 转化
+    - 留存
+    - 折扣
+    - 优惠券
+    - 获客
+    - 区域
+    - 购物篮
+```
 
 ## 通用设置
 
 ```yaml
-# 所有行业通用配置
 common:
-  # 时间格式
   date_format: "YYYY-MM-DD"
-  datetime_format: "YYYY-MM-DD HH:mm:ss"
-
-  # 数据精度
   decimal_precision: 2
   percentage_precision: 2
-
-  # 分页默认
-  default_page_size: 100
-  max_page_size: 10000
-
-  # 超时设置
-  query_timeout: 30  # 秒
-
-  # 数据更新频率
-  update_frequency:
-    real_time: "实时"
-    daily: "T+1"
-    weekly: "每周"
-    monthly: "每月"
-```
-
-## 通用字段映射
-
-```yaml
-# 所有行业都需要的通用字段
-common_fields:
-  - field: id
-    type: string
-    description: "唯一标识"
-
-  - field: create_time
-    type: datetime
-    description: "创建时间"
-
-  - field: update_time
-    type: datetime
-    description: "更新时间"
-
-  - field: status
-    type: string
-    description: "状态"
-
-  - field: remark
-    type: string
-    description: "备注"
+  query_timeout: 30
 ```
 
 ## 版本
 
-- v1.0 - 2026-04-25
+- v2.0 - 2026-05-01 — 从通用 _base 重构为快消行业专属

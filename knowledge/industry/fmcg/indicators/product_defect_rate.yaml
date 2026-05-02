@@ -1,0 +1,23 @@
+# 产品不良率
+
+code: product_defect_rate
+name: 产品不良率
+industry: fmcg
+
+keywords:
+  - 不良率
+  - 次品率
+  - 质量问题
+  - 瑕疵率
+  - 品控
+
+description: 不良品数占总生产/采购数的比例。快消行业（尤其食品饮料）对不良率要求极严格，通常控制在0.1%以下。
+
+definition:
+  formula: SUM(defect_qty) / SUM(total_qty) * 100
+  unit: "%"
+  precision: 3
+
+stats:
+  importance: 0.76
+  updated: 2026-05-01

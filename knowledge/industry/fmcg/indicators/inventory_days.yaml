@@ -1,0 +1,23 @@
+# 库存周转天数
+
+code: inventory_days
+name: 库存周转天数
+industry: fmcg
+
+keywords:
+  - 周转天数
+  - 库存天数
+  - 存货周转
+  - 库存周转天数
+  - 平均库存天数
+
+description: 平均库存消化所需天数。快消行业通常15-60天，越短说明库存管理越高效。公式：365 / 库存周转率。
+
+definition:
+  formula: 365 / inventory_turnover
+  unit: 天
+  precision: 1
+
+stats:
+  importance: 0.85
+  updated: 2026-05-01

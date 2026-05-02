@@ -1,0 +1,60 @@
+# knowledge/_base/cross_industry_mappings.yaml
+# 跨行业指标语义映射（种子映射）
+# 用途: V4-P2 语义邻近传播的跨行业扩展
+# 维护: 行业专家定义种子映射，系统在使用中调整映射权重
+# 格式: source_industry.indicator_id -> target_industry.indicator_id (confidence)
+
+version: 1
+created: 2026-05-02
+
+# 映射方向是双向的。系统在传播时自动查找反向映射。
+# confidence: 映射置信度（0-1），影响跨行业传播幅度。
+#   >= 0.80: 强映射（财务指标间通常如此）
+#   0.50-0.79: 中等映射（需目标行业数据验证）
+#   < 0.50: 弱映射（仅在小样本时参考）
+
+mappings:
+  # FMCG ↔ Finance
+  fmcg_to_finance:
+    - {from: gross_margin_rate,       to: net_interest_margin,       confidence: 0.75}
+    - {from: net_margin_rate,          to: return_on_assets,           confidence: 0.70}
+    - {from: sell_through_rate,        to: loan_utilization_rate,      confidence: 0.60}
+    - {from: inventory_turnover,       to: deposit_turnover_rate,      confidence: 0.55}
+    - {from: sales_amount,             to: loan_balance,               confidence: 0.65}
+    - {from: out_of_stock_rate,        to: liquidity_coverage_ratio,   confidence: 0.50}
+    - {from: conversion_rate,          to: deposit_to_loan_ratio,      confidence: 0.55}
+    - {from: sku_count,                to: product_count,              confidence: 0.80}
+
+  # FMCG ↔ Logistics
+  fmcg_to_logistics:
+    - {from: sales_amount,             to: parcel_volume,              confidence: 0.70}
+    - {from: order_count,              to: delivery_order_count,       confidence: 0.85}
+    - {from: sell_through_rate,        to: delivery_success_rate,      confidence: 0.65}
+    - {from: out_of_stock_rate,        to: return_rate,                confidence: 0.55}
+    - {from: inventory_turnover,       to: warehouse_turnover_rate,    confidence: 0.75}
+
+  # FMCG ↔ Manufacturing
+  fmcg_to_manufacturing:
+    - {from: sales_amount,             to: output_qty,                 confidence: 0.65}
+    - {from: conversion_rate,          to: yield_rate,                 confidence: 0.70}
+    - {from: gross_margin_rate,        to: gross_margin_rate,          confidence: 0.95}  # 同名指标
+    - {from: inventory_turnover,       to: inventory_turnover,         confidence: 0.95}  # 同名指标
+    - {from: out_of_stock_rate,        to: capacity_utilization,       confidence: 0.50}
+
+  # Finance ↔ Manufacturing
+  finance_to_manufacturing:
+    - {from: npl_ratio,                to: defect_rate,                confidence: 0.60}
+    - {from: loan_balance,             to: output_qty,                 confidence: 0.55}
+    - {from: return_on_assets,         to: roi,                        confidence: 0.80}
+
+# 跨行业传播规则
+propagation_rules:
+  # 跨行业传播幅度 = 行业内传播幅度 × transfer_weight_factor × mapping_confidence
+  transfer_weight_factor: 0.25
+
+  # 当目标行业出现反向纠正时，映射 confidence 快速衰减
+  rapid_decay_on_contradiction: true
+  contradiction_decay: 0.20             # 每次反向纠正 confidence -0.20
+
+  # 当目标行业强化信号持续支持时，映射 confidence 缓慢增长
+  reinforcement_growth: 0.05            # 每次强化信号 confidence +0.05

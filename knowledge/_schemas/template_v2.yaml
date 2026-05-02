@@ -1,0 +1,82 @@
+# knowledge/_schemas/template_v2.yaml
+# 分析模板 Schema v2 — 支持权重表示 + 草稿状态 + 自主进化
+
+schema_version: 2
+
+required_fields:
+  - id
+  - name
+  - version
+  - applicability
+  - indicators
+  - steps
+  - routing
+  - meta
+
+applicability:
+  required: [intents, scenarios]
+  properties:
+    intents: {type: array, items: {type: string}}
+    scenarios: {type: array, items: {type: string}}
+    min_indicators: {type: integer, default: 1}
+
+indicators:
+  properties:
+    primary:
+      type: array
+      items:
+        required: [id]
+        properties:
+          id: {type: string}
+          weight: {type: float, range: [0.0, 1.0], default: 0.80}
+          source: {enum: [canonical, evolution]}
+          hypothesis: {type: string}
+    secondary:
+      type: array
+      items:
+        required: [id]
+        properties:
+          id: {type: string}
+          weight: {type: float, range: [0.0, 1.0], default: 0.50}
+          source: {enum: [canonical, evolution]}
+          hypothesis: {type: string}
+
+steps:
+  type: array
+  items:
+    required: [skill]
+    properties:
+      skill: {type: string}
+      description: {type: string}
+      optional: {type: boolean, default: false}
+      weight: {type: float, range: [0.0, 1.0], default: 0.50}
+      condition: {type: string}
+
+routing:
+  required: [trigger_queries]
+  properties:
+    trigger_queries:
+      type: array
+      items:
+        required: [pattern, weight]
+        properties:
+          pattern: {type: string}
+          weight: {type: float, range: [0.0, 1.0]}
+          source: {enum: [manual, evolution]}
+
+meta:
+  required: [created, last_updated]
+  properties:
+    created: {type: date}
+    last_updated: {type: date}
+    status: {enum: [draft, active, defunct], default: active}
+    created_by: {enum: [manual, system]}
+    version: {type: integer}
+    hypothesis: {type: string}
+    evolved_from:
+      type: array
+      items:
+        properties:
+          type: {type: string}
+          hypothesis: {type: string}
+          date: {type: date}

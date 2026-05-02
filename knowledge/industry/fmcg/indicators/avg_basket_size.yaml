@@ -1,0 +1,23 @@
+# 连带率
+
+code: avg_basket_size
+name: 连带率
+industry: fmcg
+
+keywords:
+  - 连带率
+  - 连带
+  - 件单价
+  - 笔均件数
+  - 客单量
+
+description: 平均每笔订单购买的商品件数（SKU种类数）。衡量交叉销售和关联推荐效果。
+
+definition:
+  formula: COUNT(sku_id) / COUNT(DISTINCT order_id)
+  unit: 件/单
+  precision: 1
+
+stats:
+  importance: 0.82
+  updated: 2026-05-01

@@ -23,7 +23,7 @@ class IndustryStore:
     同步: 启动时增量同步（委托 sync.py）
     """
 
-    def __init__(self, industry: str, data_root: str = "data/industry"):
+    def __init__(self, industry: str, data_root: str = "knowledge/industry"):
         self.industry = industry
         self.data_root = Path(data_root)
         self.yaml_path = self.data_root / industry
@@ -286,6 +286,6 @@ class IndustryStore:
         return f"IndustryStore(industry='{self.industry}', db='{self.db_path}')"
 
 
-def get_store(industry: str = "ecommerce", data_root: str = "data/industry") -> IndustryStore:
+def get_store(industry: str = "fmcg", data_root: str = "knowledge/industry") -> IndustryStore:
     """获取行业存储实例"""
     return IndustryStore(industry, data_root)

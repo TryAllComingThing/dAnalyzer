@@ -1,24 +1,35 @@
-# 通用默认偏好设置
+# 快消行业默认偏好
 
 user: default
 
 preferences:
-  default_industry: _base
+  default_industry: fmcg
   preferred_dimensions:
+    - 品类
+    - 渠道
     - 时间
+    - 区域
   default_time_range: 本月
-  preferred_format: table
+  preferred_format: dashboard
 
 frequent_queries:
-  - query: 时间趋势
+  - query: 各品类销售额排名
     count: 10
-  - query: 用户行为
+  - query: 渠道动销情况
     count: 8
+  - query: 促销ROI分析
+    count: 6
+  - query: 毛利趋势
+    count: 5
 
 frequent_scenarios:
-  - code: time_trend
+  - code: sales_trend
     count: 5
-  - code: user_behavior
+  - code: category_analysis
+    count: 4
+  - code: profit_analysis
     count: 3
+  - code: customer_value_analysis
+    count: 2
 
-updated: 2026-04-26
+updated: 2026-05-01

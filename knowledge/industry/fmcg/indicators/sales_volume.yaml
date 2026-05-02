@@ -1,0 +1,23 @@
+# 销售量
+
+code: sales_volume
+name: 销售量
+industry: fmcg
+
+keywords:
+  - 销量
+  - 销售量
+  - 销售件数
+  - 出货量
+  - 成交件数
+
+description: 统计周期内销售商品总件数。公式：SUM(销售件数)。与销售额配合分析量价关系。
+
+definition:
+  formula: SUM(quantity)
+  unit: 件
+  precision: 0
+
+stats:
+  importance: 0.95
+  updated: 2026-05-01

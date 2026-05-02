@@ -1,0 +1,22 @@
+# 订单量
+
+code: order_count
+name: 订单量
+industry: fmcg
+
+keywords:
+  - 订单
+  - 订单量
+  - 订单数
+  - 成交量
+
+description: 快消核心指标，统计周期内订单总笔数。
+
+definition:
+  formula: COUNT(DISTINCT order_id)
+  unit: 单
+  precision: 0
+
+stats:
+  importance: 0.95
+  updated: 2026-05-01

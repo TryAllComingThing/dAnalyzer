@@ -1,0 +1,22 @@
+# 毛利额
+
+code: gross_profit
+name: 毛利额
+industry: fmcg
+
+keywords:
+  - 毛利
+  - 毛利额
+  - 利润
+  - 赚取
+
+description: 销售额减去销售成本的差额，衡量产品或品类的直接盈利能力。公式：销售额 - 销售成本(含商品成本、物流成本等)。
+
+definition:
+  formula: SUM(sales_amount - cost_amount)
+  unit: 元
+  precision: 2
+
+stats:
+  importance: 0.93
+  updated: 2026-05-01

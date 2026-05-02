@@ -1,0 +1,39 @@
+# 购物篮分析
+
+code: market_basket_analysis
+name: 购物篮分析
+industry: fmcg
+
+keywords:
+  - 购物篮
+  - 关联购买
+  - 搭售
+  - 连带
+  - 交叉销售
+  - 组合
+
+description: |
+  购物篮关联分析，发现品类间的购买关联关系，包含:
+  - 品类关联规则（支持度/置信度/提升度）
+  - 高频组合购买Top N
+  - 连带率分析
+  - 跨品类销售机会发现
+  - 捆绑促销建议
+
+content:
+  required:
+    - order_id
+    - avg_basket_size
+    - sku_count
+  optional:
+    - conversion_rate
+    - avg_order_value
+  dimensions:
+    品类组合: [各组合]
+    用户群体: [新客, 老客, 会员]
+    渠道: [各渠道]
+
+stats:
+  usage_count: 0
+  satisfaction: 0.82
+  updated: 2026-05-01

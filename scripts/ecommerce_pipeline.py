@@ -34,7 +34,7 @@ from scripts.industry_analyzers import analyze_for_industry
 from scripts.security_scan import security_scan
 
 
-def step1_retrieve_context(query: str, industry: str = "ecommerce") -> dict:
+def step1_retrieve_context(query: str, industry: str = "fmcg") -> dict:
     """
     步骤 1: 上下文检索
 
@@ -66,7 +66,7 @@ def step2_load_data(csv_path: str, required_fields: List[str] = None) -> List[Di
     return rows
 
 
-def step3_analyze(rows: List[Dict], query: str, industry: str = "ecommerce") -> dict:
+def step3_analyze(rows: List[Dict], query: str, industry: str = "fmcg") -> dict:
     """
     步骤 3: 数据分析
 
@@ -89,7 +89,7 @@ def step4_security_scan(data: List[Dict]) -> dict:
 
 
 def run_pipeline(query: str, csv_path: str,
-                 industry: str = "ecommerce") -> dict:
+                 industry: str = "fmcg") -> dict:
     """
     运行全链路数据分析管道。
 
@@ -100,7 +100,7 @@ def run_pipeline(query: str, csv_path: str,
 
     Returns:
         {
-            "pipeline": "ecommerce",
+            "pipeline": "fmcg",
             "query": "...",
             "steps": {
                 "context_retrieval": {...},
@@ -136,10 +136,7 @@ def run_pipeline(query: str, csv_path: str,
     print("\n[Pipeline] Step 2/4: 数据加载...", file=sys.stderr)
     s2_start = time.time()
     required_fields = {
-        "ecommerce": ["category", "actual_amount", "order_id"],
-        "finance": ["loan_id", "balance", "classification"],
-        "logistics": ["waybill_id", "status", "weight"],
-        "manufacturing": ["order_id", "planned_qty", "actual_qty"],
+        "fmcg": ["category", "actual_amount", "order_id"],
     }.get(industry, [])
     rows = step2_load_data(csv_path, required_fields)
     s2_time = round((time.time() - s2_start) * 1000, 2)
@@ -254,7 +251,7 @@ def main():
     parser.add_argument("--data", "-d",
                         default="tests/data/sample/test_orders.csv",
                         help="数据文件路径 (CSV)")
-    parser.add_argument("--industry", "-i", default="ecommerce",
+    parser.add_argument("--industry", "-i", default="fmcg",
                         help="行业代码")
     parser.add_argument("--output", "-o",
                         help="输出到文件")

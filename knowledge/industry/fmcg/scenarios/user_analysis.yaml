@@ -1,0 +1,36 @@
+# 用户分析
+
+code: user_analysis
+name: 用户分析
+industry: fmcg
+
+keywords:
+  - 用户
+  - 消费者
+  - 复购
+  - 会员
+  - 新客
+  - 留存
+
+description: |
+  快消消费者分析，包含:
+  - 用户规模与增长
+  - 复购率分析
+  - 新老客结构
+  - 消费频次分布
+
+content:
+  required:
+    - user_id
+    - order_count
+  optional:
+    - sales_amount
+    - conversion_rate
+  dimensions:
+    用户类型: [新客, 老客, 会员]
+    时间: [周, 月, 季度]
+
+stats:
+  usage_count: 0
+  satisfaction: 0.82
+  updated: 2026-05-01

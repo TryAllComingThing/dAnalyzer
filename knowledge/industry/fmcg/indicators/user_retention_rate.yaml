@@ -1,0 +1,24 @@
+# 用户留存率
+
+code: user_retention_rate
+name: 用户留存率
+industry: fmcg
+
+keywords:
+  - 留存
+  - 留存率
+  - 回访
+  - 老客
+  - 持续购买
+  - 回头率
+
+description: 特定周期后仍持续购买的用户比例。快消行业常用7日/30日/90日留存率。高留存率说明产品竞争力强。
+
+definition:
+  formula: COUNT(user_id WHERE retained = true) / COUNT(user_id WHERE cohort = start_date) * 100
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.88
+  updated: 2026-05-01

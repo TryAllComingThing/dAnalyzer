@@ -1,0 +1,22 @@
+# 转化率
+
+code: conversion_rate
+name: 转化率
+industry: fmcg
+
+keywords:
+  - 转化
+  - 转化率
+  - 下单率
+  - conversion
+
+description: 访客到下单的转化率。公式：下单用户数 / 访客数。
+
+definition:
+  formula: COUNT(DISTINCT order_user_id) / COUNT(DISTINCT visitor_id)
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.85
+  updated: 2026-05-01

@@ -1,0 +1,23 @@
+# 缺货率
+
+code: out_of_stock_rate
+name: 缺货率
+industry: fmcg
+
+keywords:
+  - 缺货
+  - 缺货率
+  - 断货
+  - 库存不足
+  - OOS
+
+description: 缺货SKU数占总SKU数的比例，或缺货时长占比。快消行业缺货率通常控制在3%以内。高缺货率直接损失销售机会。
+
+definition:
+  formula: COUNT(sku WHERE stock_qty = 0) / COUNT(DISTINCT sku_id) * 100
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.85
+  updated: 2026-05-01

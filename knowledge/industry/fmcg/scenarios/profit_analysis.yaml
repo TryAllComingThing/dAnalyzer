@@ -1,0 +1,41 @@
+# 利润分析
+
+code: profit_analysis
+name: 利润分析
+industry: fmcg
+
+keywords:
+  - 利润
+  - 毛利
+  - 净利
+  - 盈利
+  - 亏损
+  - 赚钱
+
+description: |
+  盈利能力多维分析，包含:
+  - 毛利/毛利率趋势
+  - 各品类/渠道利润贡献
+  - 净利润及净利率
+  - 利润同比/环比变化
+  - 低毛利/亏损品类/渠道识别
+
+content:
+  required:
+    - gross_profit
+    - gross_margin_rate
+    - sales_amount
+  optional:
+    - net_profit
+    - net_margin_rate
+    - discount_rate
+  dimensions:
+    品类: [各品类]
+    渠道: [各渠道]
+    时间: [月, 季度, 年]
+    区域: [各区域]
+
+stats:
+  usage_count: 0
+  satisfaction: 0.88
+  updated: 2026-05-01

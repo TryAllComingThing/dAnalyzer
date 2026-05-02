@@ -1,0 +1,24 @@
+# 新品占比
+
+code: new_sku_ratio
+name: 新品占比
+industry: fmcg
+
+keywords:
+  - 新品
+  - 新品率
+  - 新品占比
+  - 新品贡献
+  - 上市新品
+  - 新SKU
+
+description: 新品(上市3个月内的SKU)销售额占总销售额的比例。衡量产品创新能力和新品市场接受度。快消行业新品存活率通常30-50%。
+
+definition:
+  formula: SUM(sales_amount WHERE launch_date >= today-90d) / SUM(sales_amount) * 100
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.80
+  updated: 2026-05-01

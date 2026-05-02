@@ -1,0 +1,293 @@
+# dAnalyzer 数据源注册表
+#
+# 三类数据源:
+#   databases   — 数据库连接（持久配置，密码走环境变量）
+#   files       — 预置项目文件（路径 + schema_hint）
+#   file_discovery — 运行时文件自动发现规则
+#
+# 技能/Agent 通过 --datasource <name> 引用，不直接传连接参数或硬编码路径。
+
+# ═══════════════════════════════════════════════════════
+# 一、数据库连接
+# ═══════════════════════════════════════════════════════
+databases:
+  - name: local_mysql
+    type: mysql
+    description: 本地 MySQL — 管理系统数据库 (若依框架)
+    industry: general
+    config:
+      host: "${MYSQL_HOST:localhost}"
+      port: "${MYSQL_PORT:3306}"
+      database: ry
+      user: "${MYSQL_USER:root}"
+      # password 走环境变量 MYSQL_PASS
+      password: "${MYSQL_PASS}"
+    defaults:
+      max_rows: 10000
+      timeout_ms: 30000
+    schema_hint:
+      tables:
+        - name: sys_dept
+          description: 部门表
+          row_estimate: 100
+          columns:
+            - {name: dept_id, type: bigint, description: 部门ID}
+            - {name: parent_id, type: bigint, description: 父部门ID}
+            - {name: dept_name, type: varchar, description: 部门名称}
+            - {name: order_num, type: int, description: 排序号}
+            - {name: leader, type: varchar, description: 负责人}
+            - {name: phone, type: varchar, description: 联系电话}
+            - {name: email, type: varchar, description: 邮箱}
+            - {name: status, type: char, description: '状态(0正常 1停用)'}
+            - {name: create_time, type: datetime, description: 创建时间}
+        - name: sys_user
+          description: 用户表
+          row_estimate: 100
+          columns:
+            - {name: user_id, type: bigint, description: 用户ID}
+            - {name: dept_id, type: bigint, description: 部门ID}
+            - {name: user_name, type: varchar, description: 用户名}
+            - {name: nick_name, type: varchar, description: 昵称}
+            - {name: email, type: varchar, description: 邮箱}
+            - {name: phonenumber, type: varchar, description: 手机号}
+            - {name: sex, type: char, description: '性别(0男 1女 2未知)'}
+            - {name: status, type: char, description: '状态(0正常 1停用)'}
+            - {name: login_date, type: datetime, description: 最后登录时间}
+            - {name: login_ip, type: varchar, description: 最后登录IP}
+            - {name: create_time, type: datetime, description: 创建时间}
+        - name: sys_logininfor
+          description: 登录日志表
+          row_estimate: 10000
+          columns:
+            - {name: info_id, type: bigint, description: 日志ID}
+            - {name: user_name, type: varchar, description: 用户名}
+            - {name: ipaddr, type: varchar, description: IP地址}
+            - {name: login_location, type: varchar, description: 登录地点}
+            - {name: browser, type: varchar, description: 浏览器}
+            - {name: os, type: varchar, description: 操作系统}
+            - {name: status, type: char, description: '状态(0成功 1失败)'}
+            - {name: msg, type: varchar, description: 消息}
+            - {name: login_time, type: datetime, description: 登录时间}
+        - name: sys_oper_log
+          description: 操作日志表
+          row_estimate: 50000
+          columns:
+            - {name: oper_id, type: bigint, description: 日志ID}
+            - {name: title, type: varchar, description: 模块标题}
+            - {name: oper_name, type: varchar, description: 操作人员}
+            - {name: oper_ip, type: varchar, description: 操作IP}
+            - {name: oper_location, type: varchar, description: 操作地点}
+            - {name: status, type: char, description: '状态(0成功 1失败)'}
+            - {name: oper_time, type: datetime, description: 操作时间}
+
+  - name: local_promptweb
+    type: mysql
+    description: 本地 MySQL — promptweb 应用数据库
+    industry: general
+    config:
+      host: "${MYSQL_HOST:localhost}"
+      port: "${MYSQL_PORT:3306}"
+      database: promptweb
+      user: "${MYSQL_USER:root}"
+      password: "${MYSQL_PASS}"
+    defaults:
+      max_rows: 10000
+      timeout_ms: 30000
+    schema_hint:
+      tables:
+        - {name: gig_hire, description: 零工雇佣记录, columns: [{name: id, type: bigint}, {name: gig_id, type: bigint}, {name: user_id, type: bigint}, {name: hire_date, type: datetime}, {name: status, type: varchar}]}
+        - {name: job_hire, description: 职位雇佣记录, columns: [{name: id, type: bigint}, {name: job_id, type: bigint}, {name: user_id, type: bigint}, {name: hire_date, type: datetime}, {name: salary, type: decimal}]}
+        - {name: labor_info, description: 劳动力信息, columns: [{name: id, type: bigint}, {name: name, type: varchar}, {name: skill, type: varchar}, {name: location, type: varchar}, {name: experience_years, type: int}]}
+  - name: fmcg_orders
+    type: mysql
+    description: 快消订单主库 — 订单明细、支付、发货状态
+    industry: fmcg
+    config:
+      host: "${MYSQL_FMCG_HOST:localhost}"
+      port: "${MYSQL_FMCG_PORT:3306}"
+      database: fmcg_orders
+      user: "${MYSQL_FMCG_USER:root}"
+      # password 走环境变量 MYSQL_FMCG_PASSWORD
+    defaults:
+      max_rows: 10000
+      timeout_ms: 30000
+    schema_hint:
+      tables:
+        - name: orders
+          description: 订单主表，每行一笔订单
+          row_estimate: 5000000
+          columns:
+            - {name: order_id, type: varchar, description: 订单号}
+            - {name: user_id, type: varchar, description: 用户ID}
+            - {name: product_id, type: varchar, description: 商品ID}
+            - {name: product_name, type: varchar, description: 商品名称}
+            - {name: category, type: varchar, description: 品类}
+            - {name: brand, type: varchar, description: 品牌}
+            - {name: quantity, type: int, description: 数量}
+            - {name: unit_price, type: decimal, description: 单价}
+            - {name: actual_amount, type: decimal, description: 实付金额}
+            - {name: channel, type: varchar, description: 渠道}
+            - {name: area, type: varchar, description: 大区}
+            - {name: city, type: varchar, description: 城市}
+            - {name: order_status, type: varchar, description: 订单状态}
+            - {name: order_date, type: datetime, description: 下单日期}
+            - {name: pay_date, type: datetime, description: 支付日期}
+
+  - name: fmcg_sales
+    type: mysql
+    description: 快消销售流水 — 销售明细、毛利、促销折扣
+    industry: fmcg
+    config:
+      host: "${MYSQL_FMCG_HOST:localhost}"
+      port: "${MYSQL_FMCG_PORT:3306}"
+      database: fmcg_sales
+      user: "${MYSQL_FMCG_USER:root}"
+    defaults:
+      max_rows: 10000
+      timeout_ms: 30000
+    schema_hint:
+      tables:
+        - name: sales
+          description: 销售流水表，每行一条销售记录
+          row_estimate: 8000000
+          columns:
+            - {name: sale_id, type: varchar, description: 销售记录ID}
+            - {name: sale_date, type: date, description: 销售日期}
+            - {name: product_id, type: varchar, description: 商品ID}
+            - {name: product_name, type: varchar, description: 商品名称}
+            - {name: category, type: varchar, description: 品类}
+            - {name: brand, type: varchar, description: 品牌}
+            - {name: channel, type: varchar, description: 渠道}
+            - {name: region, type: varchar, description: 大区}
+            - {name: quantity, type: int, description: 销量}
+            - {name: unit_price, type: decimal, description: 单价}
+            - {name: discount_rate, type: decimal, description: 折扣率}
+            - {name: sale_amount, type: decimal, description: 销售额}
+            - {name: cost_amount, type: decimal, description: 成本}
+            - {name: profit_amount, type: decimal, description: 毛利}
+
+  - name: fmcg_users
+    type: mysql
+    description: 快消用户库 — 用户画像、会员等级、消费汇总
+    industry: fmcg
+    config:
+      host: "${MYSQL_FMCG_HOST:localhost}"
+      port: "${MYSQL_FMCG_PORT:3306}"
+      database: fmcg_users
+      user: "${MYSQL_FMCG_USER:root}"
+    defaults:
+      max_rows: 10000
+      timeout_ms: 30000
+    schema_hint:
+      tables:
+        - name: users
+          description: 用户主表，每行一个注册用户
+          row_estimate: 2000000
+          columns:
+            - {name: user_id, type: varchar, description: 用户ID}
+            - {name: user_name, type: varchar, description: 用户名}
+            - {name: gender, type: varchar, description: 性别}
+            - {name: age, type: int, description: 年龄}
+            - {name: city, type: varchar, description: 城市}
+            - {name: area, type: varchar, description: 大区}
+            - {name: register_date, type: date, description: 注册日期}
+            - {name: last_login, type: datetime, description: 最后登录}
+            - {name: vip_level, type: varchar, description: 会员等级}
+            - {name: total_consume, type: decimal, description: 累计消费}
+            - {name: order_count, type: int, description: 累计订单数}
+            - {name: status, type: varchar, description: 账户状态}
+
+  - name: fmcg_dw
+    type: clickhouse
+    description: 快消数仓 — 聚合分析、趋势计算（只读）
+    industry: fmcg
+    config:
+      host: "${CH_FMCG_HOST:localhost}"
+      port: "${CH_FMCG_PORT:9000}"
+      database: fmcg_dw
+      user: "${CH_FMCG_USER:default}"
+    defaults:
+      max_rows: 50000
+      timeout_ms: 120000
+    schema_hint:
+      tables:
+        - {name: sales_daily, description: 日销售汇总, columns: [{name: sale_date, type: date}, {name: category, type: varchar}, {name: channel, type: varchar}, {name: sale_amount, type: decimal}, {name: order_count, type: int}, {name: user_count, type: int}]}
+        - {name: user_behavior_log, description: 用户行为日志, columns: [{name: event_date, type: date}, {name: user_id, type: varchar}, {name: event_type, type: varchar}, {name: page, type: varchar}, {name: duration_sec, type: int}]}
+
+# ═══════════════════════════════════════════════════════
+# 二、预置项目文件
+# ═══════════════════════════════════════════════════════
+files:
+  - name: test_orders
+    type: csv
+    path: tests/data/sample/test_orders.csv
+    description: 订单样本数据（脱敏），含渠道/品类/金额/日期等字段
+    industry: fmcg
+    schema_hint:
+      columns: [order_id, user_id, product_id, product_name, category, brand, quantity, unit_price, actual_amount, channel, area, city, order_status, order_date, pay_date]
+
+  - name: test_sales
+    type: csv
+    path: tests/data/sample/test_sales.csv
+    description: 销售流水样本（脱敏），含销售额/成本/毛利/折扣率
+    industry: fmcg
+    schema_hint:
+      columns: [sale_id, sale_date, product_id, product_name, category, brand, channel, region, quantity, unit_price, discount_rate, sale_amount, cost_amount, profit_amount]
+
+  - name: test_users
+    type: csv
+    path: tests/data/sample/test_users.csv
+    description: 用户样本数据（脱敏），含画像/会员等级/消费汇总
+    industry: fmcg
+    schema_hint:
+      columns: [user_id, user_name, gender, age, area, city, register_date, vip_level, total_consume, order_count, status]
+
+  - name: test_products
+    type: csv
+    path: tests/data/sample/test_products.csv
+    description: 商品样本数据（脱敏）
+    industry: fmcg
+    schema_hint:
+      columns: [product_id, product_name, category, brand, unit_price, cost, stock_quantity]
+
+  - name: test_finance_transactions
+    type: csv
+    path: tests/data/sample/test_finance_transactions.csv
+    description: 金融交易样本数据（脱敏）
+    industry: finance
+    schema_hint:
+      columns: [transaction_id, user_id, transaction_type, amount, transaction_date, status]
+
+  - name: test_logistics_waybills
+    type: csv
+    path: tests/data/sample/test_logistics_waybills.csv
+    description: 物流运单样本数据（脱敏）
+    industry: logistics
+    schema_hint:
+      columns: [waybill_id, order_id, carrier, origin, destination, ship_date, delivery_date, status]
+
+  - name: test_manufacturing_production
+    type: csv
+    path: tests/data/sample/test_manufacturing_production.csv
+    description: 制造产量样本数据（脱敏）
+    industry: manufacturing
+    schema_hint:
+      columns: [record_id, production_date, line_id, product_id, planned_qty, actual_qty, defect_qty, oee]
+
+# ═══════════════════════════════════════════════════════
+# 三、运行时文件自动发现
+# ═══════════════════════════════════════════════════════
+file_discovery:
+  search_paths:
+    - "."
+    - "tests/data/sample"
+    - "knowledge/sample"
+    - "output"
+    - "data"
+  extensions:
+    csv: csv-connector
+    tsv: csv-connector
+    json: json-connector
+    jsonl: json-connector
+    xlsx: excel-connector
+    xls: excel-connector

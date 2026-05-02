@@ -1,0 +1,41 @@
+# 客户价值分析
+
+code: customer_value_analysis
+name: 客户价值分析
+industry: fmcg
+
+keywords:
+  - 客户价值
+  - 用户价值
+  - RFM
+  - 用户分层
+  - 高价值
+  - 用户贡献
+
+description: |
+  客户价值分层与评估，包含:
+  - RFM 模型分层（最近消费/频率/金额）
+  - 客户终身价值(CLV)计算
+  - 复购率与留存率分析
+  - 高/中/低价值客户占比
+  - 客户流失预警
+
+content:
+  required:
+    - order_count
+    - sales_amount
+    - repurchase_rate
+    - clv
+  optional:
+    - user_retention_rate
+    - active_user_count
+    - member_count
+  dimensions:
+    价值层级: [高价值, 中价值, 低价值]
+    时间: [月, 季度]
+    品类偏好: [各品类]
+
+stats:
+  usage_count: 0
+  satisfaction: 0.90
+  updated: 2026-05-01

@@ -31,8 +31,8 @@ related_skills:
 |------|--------|------|
 | hive: | Hive 数据仓库 | `hive: SELECT * FROM sales` |
 | mysql: | MySQL 数据库 | `mysql: SELECT * FROM orders` |
-| csv: | CSV 文件 | `csv: /data/sales.csv` |
-| excel: | Excel 文件 | `excel: /data/sales.xlsx` |
+| csv: | CSV 文件 | `csv: /knowledge/sales.csv` |
+| excel: | Excel 文件 | `excel: /knowledge/sales.xlsx` |
 | 默认 | 智能选择 | 系统自动判断 |
 
 ## 使用示例
@@ -45,7 +45,7 @@ related_skills:
 /query sql mysql: SELECT * FROM orders WHERE created_at > '2026-04-01'
 
 # 查询 CSV
-/query sql csv:/data/orders.csv SELECT * WHERE amount > 1000
+/query sql csv:/knowledge/orders.csv SELECT * WHERE amount > 1000
 
 # 带条件查询
 /query sql SELECT region, COUNT(*) as cnt FROM sales GROUP BY region ORDER BY cnt DESC

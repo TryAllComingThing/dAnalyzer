@@ -1,134 +1,92 @@
 #!/usr/bin/env bash
 # learn/hooks/analyze-observe
-# PostToolUse Hook - 记录分析行为到观察存储
+# PostToolUse Hook - 记录分析行为到观察存储 (v2 结构化)
+#
+# 产出 Observation v2 记录到 learn/data/observations/sessions/{session_id}.jsonl
+# 相比 v1 增加了: candidates / context / user_anon_id / skill_chain / template
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 LEARN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# 环境变量由 Claude Code 提供
 TOOL_NAME="${CLAUDE_TOOL_NAME:-}"
 TOOL_INPUT="${CLAUDE_TOOL_INPUT:-}"
-TOOL_RESULT="${CLAUDE_TOOL_RESULT:-}"
 SESSION_ID="${CLAUDE_SESSION_ID:-default}"
 
-# 观察存储目录
 OBS_DIR="${LEARN_ROOT}/data/observations/sessions"
 mkdir -p "$OBS_DIR"
 
 # ============================================
-# 观察类型判断
+# 辅助函数
 # ============================================
 
-# 判断观察类型
-get_observation_type() {
-    local tool="$1"
-    local input="$2"
-
-    case "$tool" in
-        Skill)
-            # 解析 Skill 名称
-            local skill_name=$(echo "$input" | grep -oP '(?<=Skill: )\w+' | head -1 || echo "unknown")
-
-            # 根据 Skill 类型判断观察类型
-            case "$skill_name" in
-                data-query|query)
-                    echo "query"
-                    ;;
-                data-analysis|analysis)
-                    echo "analysis"
-                    ;;
-                visual|report)
-                    echo "output"
-                    ;;
-                error-handler)
-                    echo "error"
-                    ;;
-                *)
-                    echo "general"
-                    ;;
-            esac
-            ;;
-        *)
-            echo "general"
-            ;;
-    esac
+get_turn_number() {
+    local session_file="${OBS_DIR}/${SESSION_ID}.jsonl"
+    if [ -f "$session_file" ]; then
+        wc -l < "$session_file" 2>/dev/null || echo "0"
+    else
+        echo "0"
+    fi
 }
 
-# ============================================
-# 数据提取
-# ============================================
-
-# 提取 Skill 名称
+# 从 TOOL_INPUT 提取 skill 名称 (Skill: skill-name 格式)
 extract_skill_name() {
     local input="$1"
-    echo "$input" | grep -oP '(?<=Skill: )\w+' | head -1 || echo "unknown"
+    echo "$input" | grep -oP '(?<=Skill: )\w[\w-]*' | head -1 || echo "unknown"
 }
 
-# 提取自然语言查询
+# 提取自然语言查询（Skill: xxx 后面的内容）
 extract_nl_query() {
     local input="$1"
-    # 提取 Skill: 后面的内容作为查询
-    echo "$input" | sed 's/Skill: \w\+ *//' | head -c 500
+    echo "$input" | sed 's/Skill: \w[\w-]* *//' | head -c 1000
 }
 
-# 提取生成的 SQL (如果有)
-extract_generated_sql() {
+# 哈希用户 ID（不可逆匿名化）
+hash_user_id() {
+    local raw="${CLAUDE_USER_ID:-anonymous}"
+    echo "$raw" | shasum -a 256 | cut -c1-16
+}
+
+# 推断时间周期
+infer_time_period() {
+    local query="$1"
+    local today
+    today=$(date +%d)
+
+    if echo "$query" | grep -qiE '(月底|月末|月末盘点|month.end)'; then
+        echo "month_end"
+    elif echo "$query" | grep -qiE '(季度|季度末|quarter.end)'; then
+        echo "quarter_end"
+    elif echo "$query" | grep -qiE '(促销|活动|大促|618|双11|双十二|promo)'; then
+        echo "promo_period"
+    else
+        echo "normal"
+    fi
+}
+
+# 推断触发来源
+infer_trigger_source() {
+    local input="$1"
+    if echo "$input" | grep -qiE '(不对|不是|错了|纠正|修正|改成|换成)'; then
+        echo "correction"
+    elif echo "$input" | grep -qiE '(再来|接着|继续|还要|再给我)'; then
+        echo "follow_up"
+    else
+        echo "new_query"
+    fi
+}
+
+# 从 TOOL_RESULT 提取 candidates (如果工具输出包含候选信息)
+extract_candidates() {
     local result="$1"
-    # 简单提取，假设 SQL 在结果中
-    echo "$result" | grep -oP 'SELECT.*FROM.*' | head -1 | head -c 1000 || echo ""
-}
+    local candidates_json="[]"
 
-# 提取分析指标
-extract_indicators() {
-    local input="$1"
-    # 常见的指标关键词
-    echo "$input" | grep -oiE '(销售|转化|增长|点击|访问|用户|订单|收入|成本|利润|毛利|客单)' | sort -u | tr '\n' ',' | sed 's/,$//'
-}
-
-# 提取分析维度
-extract_dimensions() {
-    local input="$1"
-    # 常见的维度关键词
-    echo "$input" | grep -oiE '(时间|区域|省份|城市|产品|类目|渠道|用户|性别|年龄|月份|日期)' | sort -u | tr '\n' ',' | sed 's/,$//'
-}
-
-# ============================================
-# 记录观察
-# ============================================
-
-record_observation() {
-    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-    local obs_type=$(get_observation_type "$TOOL_NAME" "$TOOL_INPUT")
-
-    # 构建观察记录
-    local obs_data=""
-
-    case "$TOOL_NAME" in
-        Skill)
-            local skill_name=$(extract_skill_name "$TOOL_INPUT")
-            local nl_query=$(extract_nl_query "$TOOL_INPUT")
-            local indicators=$(extract_indicators "$TOOL_INPUT")
-            local dimensions=$(extract_dimensions "$TOOL_INPUT")
-            local generated_sql=$(extract_generated_sql "$TOOL_RESULT")
-
-            obs_data=$(cat <<EOF
-{"timestamp":"$timestamp","type":"$obs_type","session":"$SESSION_ID","tool":"$TOOL_NAME","skill":"$skill_name","nl_query":"$nl_query","indicators":"$indicators","dimensions":"$dimensions","sql":"$generated_sql"}
-EOF
-)
-            ;;
-        *)
-            obs_data=$(cat <<EOF
-{"timestamp":"$timestamp","type":"$obs_type","session":"$SESSION_ID","tool":"$TOOL_NAME"}
-EOF
-)
-            ;;
-    esac
-
-    # 写入观察文件
-    local obs_file="${OBS_DIR}/${SESSION_ID}.jsonl"
-    echo "$obs_data" >> "$obs_file"
+    # 尝试从 TOOL_RESULT 中提取 intent_parser 返回的 top-N 候选
+    if echo "$result" | grep -q '"candidates"'; then
+        candidates_json=$(echo "$result" | grep -oP '"candidates"\s*:\s*\[[^\]]+\]' | head -1 | sed 's/"candidates"\s*:\s*//' || echo "[]")
+    fi
+    echo "$candidates_json"
 }
 
 # ============================================
@@ -136,10 +94,83 @@ EOF
 # ============================================
 
 main() {
-    # post-tool-use 已内置 Skill-only 守卫，至此仅处理 Skill 调用
-    if [ "$TOOL_NAME" = "Skill" ]; then
-        record_observation
+    # 仅处理 Skill 调用（PostToolUse hook 本身已限制）
+    if [ "$TOOL_NAME" != "Skill" ]; then
+        exit 0
     fi
+
+    local skill_name
+    skill_name=$(extract_skill_name "$TOOL_INPUT")
+    local nl_query
+    nl_query=$(extract_nl_query "$TOOL_INPUT")
+    local user_anon_id
+    user_anon_id=$(hash_user_id)
+    local time_period
+    time_period=$(infer_time_period "$nl_query")
+    local trigger_source
+    trigger_source=$(infer_trigger_source "$TOOL_INPUT")
+    local turn
+    turn=$(get_turn_number)
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    # 推断 industry（从 CLAUDE_PROJECT_DIR 或默认）
+    local industry="general"
+    if [ -n "${CLAUDE_PROJECT_DIR:-}" ]; then
+        case "$CLAUDE_PROJECT_DIR" in
+            *ecommerce*|*电商*) industry="ecommerce" ;;
+            *finance*|*金融*)  industry="finance" ;;
+            *logistics*|*物流*) industry="logistics" ;;
+            *manufacturing*|*制造*) industry="manufacturing" ;;
+        esac
+    fi
+
+    # 推断 source（L1 exact / L2 match / L3 fallback）
+    local source="l2_match"
+    if echo "$nl_query" | grep -qiE '(^$|unknown)'; then
+        source="l3_fallback"
+    fi
+
+    # 构建 v2 observation JSON
+    local obs_json
+    obs_json=$(cat <<EOF
+{
+  "version": 2,
+  "ts": "$timestamp",
+  "session_id": "$SESSION_ID",
+  "turn": $turn,
+  "query": "$nl_query",
+  "industry": "$industry",
+  "source": "$source",
+  "indicators_retrieved": [],
+  "scenarios_retrieved": [],
+  "models_retrieved": [],
+  "analysis_type": "",
+  "skill_chain_planned": [],
+  "skill_chain_actual": [],
+  "indicators_candidates": [],
+  "template_matched": null,
+  "context": {
+    "time_period": "$time_period",
+    "query_raw": "$nl_query",
+    "trigger_source": "$trigger_source",
+    "query_intent_hint": null
+  },
+  "user_anon_id": "$user_anon_id",
+  "error": null
+}
+EOF
+)
+
+    # 写入 session observation 文件
+    local obs_file="${OBS_DIR}/${SESSION_ID}.jsonl"
+    echo "$obs_json" | tr -d '\n' >> "$obs_file"
+    echo "" >> "$obs_file"
+
+    # 额外记录 skill 调用计数
+    local skill_log="${LEARN_ROOT}/data/observations/skill_calls/${SESSION_ID}.jsonl"
+    mkdir -p "$(dirname "$skill_log")"
+    echo "{\"ts\":\"$timestamp\",\"turn\":$turn,\"skill\":\"$skill_name\"}" >> "$skill_log"
 }
 
 main

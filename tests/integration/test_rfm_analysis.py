@@ -12,6 +12,8 @@ import sys
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from scripts.rfm_segmentation import calculate_rfm, segment_users
+
 
 class TestRFMAnalysis:
     """RFM 分析技能测试"""
@@ -27,27 +29,6 @@ class TestRFMAnalysis:
             {"user_id": "U003", "order_date": (test_date - timedelta(days=30)).strftime("%Y-%m-%d"), "amount": 200},
         ]
 
-        # RFM 计算
-        def calculate_rfm(data, reference_date):
-            rfm_results = {}
-
-            for row in data:
-                user_id = row["user_id"]
-                order_date = datetime.strptime(row["order_date"], "%Y-%m-%d")
-                amount = float(row["amount"])
-
-                if user_id not in rfm_results:
-                    rfm_results[user_id] = {
-                        "recency": (reference_date - order_date).days,
-                        "frequency": 0,
-                        "monetary": 0
-                    }
-
-                rfm_results[user_id]["frequency"] += 1
-                rfm_results[user_id]["monetary"] += amount
-
-            return rfm_results
-
         rfm = calculate_rfm(test_data, test_date)
 
         # 验证
@@ -61,36 +42,11 @@ class TestRFMAnalysis:
         # 用户 RFM 数据
         rfm_data = {
             "U001": {"recency": 5, "frequency": 5, "monetary": 5000},
-            "U002": {"recency": 2, "frequency": 1, "amount": 100},
+            "U002": {"recency": 2, "frequency": 1, "monetary": 100},
             "U003": {"recency": 30, "frequency": 10, "monetary": 10000},
             "U004": {"recency": 15, "frequency": 3, "monetary": 800},
             "U005": {"recency": 1, "frequency": 2, "monetary": 2000},
         }
-
-        # RFM 分群 (8类)
-        def segment_users(rfm):
-            segments = {}
-
-            for user_id, rfm_values in rfm.items():
-                r = rfm_values["recency"]
-                f = rfm_values["frequency"]
-                m = rfm_values["monetary"]
-
-                # 简单分群逻辑
-                if r <= 7 and f >= 3 and m >= 1000:
-                    segment = "高价值客户"
-                elif r <= 7 and f < 3:
-                    segment = "潜力客户"
-                elif r > 30 and f >= 5:
-                    segment = "流失风险客户"
-                elif r > 30:
-                    segment = "流失客户"
-                else:
-                    segment = "普通客户"
-
-                segments[user_id] = segment
-
-            return segments
 
         segments = segment_users(rfm_data)
 

@@ -166,14 +166,11 @@ def analyze_manufacturing(rows: List[Dict], query: str) -> dict:
 
 # 行业代码 → 分析函数映射
 ANALYZER_MAP: Dict[str, Callable] = {
-    "ecommerce": analyze_ecommerce,
-    "logistics": analyze_logistics,
-    "finance": analyze_finance,
-    "manufacturing": analyze_manufacturing,
+    "fmcg": analyze_ecommerce,
 }
 
 
-def analyze_for_industry(rows: List[Dict], query: str, industry: str = "ecommerce") -> dict:
+def analyze_for_industry(rows: List[Dict], query: str, industry: str = "fmcg") -> dict:
     """
     根据行业调度对应的分析函数
 

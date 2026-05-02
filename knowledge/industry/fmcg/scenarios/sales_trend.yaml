@@ -1,0 +1,35 @@
+# 销售趋势分析
+
+code: sales_trend
+name: 销售趋势分析
+industry: fmcg
+
+keywords:
+  - 销售趋势
+  - 趋势
+  - 同比
+  - 环比
+  - 增长
+
+description: |
+  快消销售数据的时间趋势分析，包含:
+  - 销售额/量趋势
+  - 同比环比对比
+  - 品类/渠道维度拆分
+
+content:
+  required:
+    - sales_amount
+    - order_count
+  optional:
+    - conversion_rate
+    - sku_count
+  dimensions:
+    时间: [日, 周, 月, 季度, 年]
+    品类: [各品类]
+    渠道: [线上, 线下, 经销商, 直营]
+
+stats:
+  usage_count: 0
+  satisfaction: 0.85
+  updated: 2026-05-01

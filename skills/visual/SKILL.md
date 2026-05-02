@@ -56,11 +56,24 @@ ec.write(data_list, 'output/export.xlsx')
 
 ---
 
+## HTML 生成规范（强制执行）
+
+**生成 HTML 前必须加载页面外壳，禁止从零编写完整 HTML。**
+
+```
+1. Read skills/visual/assets/page-chrome.html → 获取页面外壳（含下载工具栏、响应式 CSS、ECharts 初始化）
+2. 替换占位符：{{ PAGE_TITLE }}、{{ DATE_RANGE }}、{{ GENERATED_AT }}、{{ SECURITY_NOTE }}
+3. 在 {{ CONTENT }} 注入图表卡片（KPI 卡片 + 图表容器 + 明细数据表）
+4. 将各图表的原始数据注入 {{ ALL_DATA_JSON }}，供下载按钮使用
+5. 每个图表调用 registerChart(domId, option) 注册实例
+6. 下载按钮位置、样式、行为由 page-chrome.html 统一定义，不得自行修改
+```
+
 ## 核心能力
 
 1. **ECharts集成** ⭐ — 完整ECharts配置，生成交互式HTML图表
 2. **自适应多端** ⭐ — 输出HTML自动适配PC/平板/手机
-3. **数据交互** ⭐ — 点击查看明细、查看原始数据、下载数据
+3. **数据交互** ⭐ — 页面右上角统一下载工具栏（CSV/Excel），图表卡片内单图下载
 4. **趋势图** — 折线图、面积图
 5. **对比图** — 柱状图、条形图
 6. **分布图** — 直方图、箱线图
@@ -84,7 +97,8 @@ ec.write(data_list, 'output/export.xlsx')
 
 - skills/data-query - 数据查询
 - skills/data-clean - 数据清洗
-- rules/base/chart-standard.md - 图表规范
+- skills/visual/references/chart-standard.md — 图表规范
+- skills/visual/assets/export-template.md — 导出格式模板
 - ECharts CDN: https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js
 
 ---

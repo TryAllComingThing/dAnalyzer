@@ -1,0 +1,23 @@
+# 折扣率
+
+code: discount_rate
+name: 折扣率
+industry: fmcg
+
+keywords:
+  - 折扣
+  - 折扣率
+  - 折让
+  - 优惠
+  - 降价
+
+description: 折扣金额占原价销售额的比例。高折扣率可能说明促销过度或定价策略需调整。
+
+definition:
+  formula: SUM(discount_amount) / SUM(original_price * quantity) * 100
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.78
+  updated: 2026-05-01

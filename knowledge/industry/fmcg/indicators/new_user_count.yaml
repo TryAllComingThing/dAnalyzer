@@ -1,0 +1,24 @@
+# 新增用户数
+
+code: new_user_count
+name: 新增用户数
+industry: fmcg
+
+keywords:
+  - 新用户
+  - 新增
+  - 拉新
+  - 新客
+  - 首次购买
+  - 获客
+
+description: 统计周期内首次购买的用户数量。衡量市场拓展和获客能力。
+
+definition:
+  formula: COUNT(DISTINCT user_id WHERE first_order_date BETWEEN start_date AND end_date)
+  unit: 人
+  precision: 0
+
+stats:
+  importance: 0.88
+  updated: 2026-05-01

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ PAGE_TITLE }}</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: #333; background: #f5f6f8; padding: 20px;
+    }
+
+    /* ═══ 页面头部 ═══ */
+    .page-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px; padding: 0 4px;
+    }
+    .page-title { font-size: 20px; font-weight: 700; color: #1a1a1a; }
+    .page-meta  { font-size: 13px; color: #888; margin-top: 4px; }
+
+    /* ═══ 下载工具栏 — 页面级 — 固定右上角 ═══ */
+    .download-toolbar {
+      display: flex; align-items: center; gap: 10px;
+      background: #fff; border: 1px solid #e0e0e0; border-radius: 8px;
+      padding: 8px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .toolbar-label { font-size: 13px; color: #666; white-space: nowrap; }
+    .btn-download {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 6px 14px; border-radius: 6px; border: 1px solid;
+      font-size: 13px; cursor: pointer; transition: all 0.15s;
+      background: #fff; white-space: nowrap;
+    }
+    .btn-csv   { color: #1E88E5; border-color: #1E88E5; }
+    .btn-csv:hover   { background: #1E88E5; color: #fff; }
+    .btn-excel { color: #43A047; border-color: #43A047; }
+    .btn-excel:hover { background: #43A047; color: #fff; }
+
+    /* ═══ KPI 卡片区 ═══ */
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px; margin-bottom: 20px;
+    }
+    .kpi-card {
+      background: #fff; border-radius: 10px; padding: 18px 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #eee;
+    }
+    .kpi-label { font-size: 13px; color: #888; margin-bottom: 6px; }
+    .kpi-value { font-size: 28px; font-weight: 700; color: #1a1a1a; }
+    .kpi-change { font-size: 13px; margin-top: 4px; }
+    .kpi-up    { color: #43A047; }
+    .kpi-down  { color: #E53935; }
+
+    /* ═══ 图表卡片 ═══ */
+    .chart-card {
+      background: #fff; border-radius: 10px; margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #eee;
+      overflow: hidden;
+    }
+    .chart-card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 20px; border-bottom: 1px solid #f0f0f0;
+    }
+    .chart-card-title { font-size: 15px; font-weight: 600; color: #333; }
+    .chart-card-download {
+      font-size: 12px; color: #888; cursor: pointer; padding: 4px 10px;
+      border: 1px solid #ddd; border-radius: 4px; background: #fff;
+      transition: all 0.15s;
+    }
+    .chart-card-download:hover { color: #1E88E5; border-color: #1E88E5; }
+    .chart-card-body { padding: 12px 8px; }
+    .chart-container { width: 100%; height: 400px; }
+
+    /* ═══ 明细数据表 ═══ */
+    .data-table-wrap { overflow-x: auto; }
+    .data-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+    }
+    .data-table th {
+      background: #fafafa; padding: 10px 14px; text-align: left;
+      font-weight: 600; border-bottom: 2px solid #e0e0e0; white-space: nowrap;
+    }
+    .data-table td {
+      padding: 8px 14px; border-bottom: 1px solid #f0f0f0;
+    }
+    .data-table tr:hover td { background: #fafcff; }
+
+    /* ═══ 页面底部 ═══ */
+    .page-footer {
+      text-align: center; padding: 20px 0; font-size: 12px; color: #aaa;
+      border-top: 1px solid #eee; margin-top: 20px;
+    }
+
+    /* ═══ 响应式 ═══ */
+    @media (max-width: 768px) {
+      body { padding: 12px; }
+      .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .chart-container { height: 300px; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .chart-container { height: 240px; }
+      .kpi-grid { grid-template-columns: 1fr; }
+      .download-toolbar { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!--  页面头部 + 下载工具栏（固定：右上角）           -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ PAGE_TITLE }}</h1>
+      <div class="page-meta">
+        数据周期：{{ DATE_RANGE }} ｜ 生成时间：{{ GENERATED_AT }}
+      </div>
+    </div>
+    <div class="download-toolbar">
+      <span class="toolbar-label">下载全部数据：</span>
+      <button class="btn-download btn-csv"   onclick="downloadAllCSV()">📥 CSV</button>
+      <button class="btn-download btn-excel" onclick="downloadAllExcel()">📥 Excel</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!--  内容注入点：KPI 卡片 / 图表卡片 / 明细表        -->
+  <!-- ═══════════════════════════════════════════════ -->
+  {{ CONTENT }}
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!--  页面底部                                       -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="page-footer">
+    {{ SECURITY_NOTE }}
+  </div>
+
+  <script>
+    // ═══ 全局状态 ═══
+    // allChartsData: Claude 注入所有图表的原始数据，供下载使用
+    // 格式: { pageTitle: "...", dateRange: "...", charts: [{ id, title, type, data: [...] }] }
+    var ALL_DATA = {{ ALL_DATA_JSON }};
+
+    // ═══ ECharts 实例管理 ═══
+    var chartInstances = [];
+
+    function registerChart(domId, option) {
+      var dom = document.getElementById(domId);
+      if (!dom) return;
+      var chart = echarts.init(dom);
+      chart.setOption(option);
+      chartInstances.push(chart);
+    }
+
+    // ═══ 响应式批量 resize ═══
+    window.addEventListener('resize', function() {
+      chartInstances.forEach(function(c) { c.resize(); });
+    });
+
+    // ═══ 图表级下载 — 下载单个图表的数据 ═══
+    function downloadChartData(chartId) {
+      var chart = ALL_DATA.charts.find(function(c) { return c.id === chartId; });
+      if (!chart) { console.error('Chart not found: ' + chartId); return; }
+      downloadCSV(chart.data, chart.title);
+    }
+
+    // ═══ 页面级下载 — 下载全部数据 ═══
+    function downloadAllCSV() {
+      var allRows = [];
+      ALL_DATA.charts.forEach(function(chart) {
+        allRows.push(['--- ' + chart.title + ' ---']);
+        if (chart.data.length > 0) {
+          allRows.push(Object.keys(chart.data[0]));
+          chart.data.forEach(function(row) {
+            allRows.push(Object.values(row));
+          });
+        }
+        allRows.push([]);
+      });
+      var csv = allRows.map(function(row) {
+        return row.map(escapeCSV).join(',');
+      }).join('\n');
+      triggerDownload(csv, (ALL_DATA.pageTitle || 'export') + '.csv', 'text/csv;charset=utf-8');
+    }
+
+    function downloadAllExcel() {
+      var csv = '';
+      ALL_DATA.charts.forEach(function(chart) {
+        csv += chart.title + '\n';
+        if (chart.data.length > 0) {
+          csv += Object.keys(chart.data[0]).join(',') + '\n';
+          chart.data.forEach(function(row) {
+            csv += Object.values(row).map(escapeCSV).join(',') + '\n';
+          });
+        }
+        csv += '\n';
+      });
+      triggerDownload(csv, (ALL_DATA.pageTitle || 'export') + '.csv', 'text/csv;charset=utf-8');
+    }
+
+    // ═══ 工具函数 ═══
+    function downloadCSV(data, filename) {
+      if (!data || data.length === 0) return;
+      var keys = Object.keys(data[0]);
+      var rows = [keys.join(',')];
+      data.forEach(function(row) {
+        rows.push(keys.map(function(k) { return escapeCSV(row[k]); }).join(','));
+      });
+      var csv = rows.join('\n');
+      triggerDownload(csv, (filename || 'chart_data') + '.csv', 'text/csv;charset=utf-8');
+    }
+
+    function escapeCSV(val) {
+      if (val == null) return '';
+      var s = String(val);
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    }
+
+    function triggerDownload(content, filename, mimeType) {
+      var blob = new Blob(['﻿' + content], { type: mimeType });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

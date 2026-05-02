@@ -1,0 +1,39 @@
+# 库存分析
+
+code: inventory_analysis
+name: 库存分析
+industry: fmcg
+
+keywords:
+  - 库存
+  - 存货
+  - 周转
+  - 缺货
+  - 滞销
+  - 临期
+
+description: |
+  库存健康度分析，包含:
+  - 库存周转率/天数趋势
+  - 缺货率监控
+  - 滞销SKU识别（动销率低）
+  - 库存金额分布（按品类/仓库）
+  - 临期商品预警
+
+content:
+  required:
+    - inventory_turnover
+    - out_of_stock_rate
+    - sell_through_rate
+  optional:
+    - inventory_days
+    - sku_count
+  dimensions:
+    品类: [各品类]
+    仓库: [各仓库/区域]
+    时间: [周, 月, 季度]
+
+stats:
+  usage_count: 0
+  satisfaction: 0.85
+  updated: 2026-05-01

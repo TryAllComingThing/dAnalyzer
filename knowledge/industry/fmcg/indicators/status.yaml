@@ -1,33 +1,21 @@
-# 通用状态指标
+# 状态
 
-id: base_006
 code: status
 name: 状态
-type: indicator
-industry: _base
+industry: fmcg
 
 keywords:
   - 状态
-  - state
+  - 订单状态
   - status
-  - 状态码
 
-description: |
-  通用状态字段，用于数据状态统计。
-  支持各类状态枚举值统计。
+description: 订单/商品状态字段，用于状态分布和流转分析。
 
 definition:
-  formula: status
-  aggregation: COUNT + GROUP BY
+  formula: COUNT GROUP BY status
   unit: 种
   precision: 0
 
-mapping:
-  table: "*"
-  field: status
-  notes: "通用状态字段"
-
 stats:
-  access_count: 400
-  importance: 0.7
-  updated: 2026-04-26
+  importance: 0.75
+  updated: 2026-05-01

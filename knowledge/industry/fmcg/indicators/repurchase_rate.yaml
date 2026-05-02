@@ -1,0 +1,24 @@
+# 复购率
+
+code: repurchase_rate
+name: 复购率
+industry: fmcg
+
+keywords:
+  - 复购
+  - 复购率
+  - 重复购买
+  - 回购
+  - 回头客
+  - 老客占比
+
+description: 购买2次及以上的用户占总购买用户的比例。快消行业复购率是品牌忠诚度和产品力的核心指标。
+
+definition:
+  formula: COUNT(DISTINCT user_id WHERE order_count >= 2) / COUNT(DISTINCT user_id WHERE order_count >= 1) * 100
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.91
+  updated: 2026-05-01

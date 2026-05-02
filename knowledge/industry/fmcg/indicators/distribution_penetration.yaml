@@ -1,0 +1,23 @@
+# 铺货率
+
+code: distribution_penetration
+name: 铺货率
+industry: fmcg
+
+keywords:
+  - 铺货
+  - 铺货率
+  - 分销率
+  - 上架率
+  - 覆盖
+
+description: SKU在目标渠道中上架的覆盖比例。可按数值铺货率（有货门店比例）和加权铺货率（按门店销售额加权）分别计算。
+
+definition:
+  formula: COUNT(store WHERE sku_in_stock = true) / COUNT(total_store) * 100
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.84
+  updated: 2026-05-01

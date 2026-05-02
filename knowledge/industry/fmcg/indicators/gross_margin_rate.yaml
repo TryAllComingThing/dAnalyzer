@@ -1,0 +1,22 @@
+# 毛利率
+
+code: gross_margin_rate
+name: 毛利率
+industry: fmcg
+
+keywords:
+  - 毛利率
+  - 毛利占比
+  - 盈利水平
+  - margin
+
+description: 毛利额占销售额的百分比，快消行业核心盈利指标。不同品类毛利率差异大（饮料40-60%，日化30-50%，食品15-30%）。
+
+definition:
+  formula: SUM(sales_amount - cost_amount) / SUM(sales_amount) * 100
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.92
+  updated: 2026-05-01

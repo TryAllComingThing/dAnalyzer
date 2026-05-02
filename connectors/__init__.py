@@ -8,7 +8,7 @@ Usage:
     result = db.execute("SELECT 1")
 
     csv = create_tool_connector("csv")
-    result = csv.read("data/file.csv")
+    result = csv.read("knowledge/file.csv")
 """
 
 from connectors.datawarehouse.base import create_connector

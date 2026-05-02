@@ -1,0 +1,44 @@
+# 促销效果分析
+
+code: promotion_analysis
+name: 促销效果分析
+industry: fmcg
+
+keywords:
+  - 促销
+  - 活动
+  - 打折
+  - 满减
+  - 优惠券
+  - 大促
+  - "618"
+  - 双11
+
+description: |
+  促销活动效果评估，包含:
+  - 促销前后销售额/量对比
+  - 促销ROI计算
+  - 优惠券核销率
+  - 促销对毛利的影响
+  - 促销期间新客获取
+
+content:
+  required:
+    - sales_amount
+    - order_count
+    - promotion_roi
+  optional:
+    - gross_profit
+    - coupon_usage_rate
+    - discount_rate
+    - new_user_count
+  dimensions:
+    活动: [各促销活动]
+    品类: [各品类]
+    渠道: [各渠道]
+    时间: [活动前, 活动中, 活动后]
+
+stats:
+  usage_count: 0
+  satisfaction: 0.82
+  updated: 2026-05-01

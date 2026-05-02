@@ -1,0 +1,22 @@
+# 净利率
+
+code: net_margin_rate
+name: 净利率
+industry: fmcg
+
+keywords:
+  - 净利率
+  - 净利占比
+  - 纯利率
+  - 净利润率
+
+description: 净利润占销售额的百分比。快消行业通常净利率在5-15%之间，高毛利品类可达20%+。
+
+definition:
+  formula: net_profit / SUM(sales_amount) * 100
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.85
+  updated: 2026-05-01

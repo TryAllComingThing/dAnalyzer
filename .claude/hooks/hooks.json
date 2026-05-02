@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreTask": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[PreTask] Checking if this is a data analysis task'",
+            "description": "Detect data analysis tasks"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[PostToolUse] Logging tool execution for audit'",
+            "description": "Log tool execution for dAnalyzer audit trail"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[Stop] Session ending - checking for uncommitted analysis results'",
+            "description": "Check for uncommitted analysis results before stopping"
+          }
+        ]
+      }
+    ]
+  }
+}

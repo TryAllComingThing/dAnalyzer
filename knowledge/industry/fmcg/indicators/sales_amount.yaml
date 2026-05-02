@@ -1,0 +1,24 @@
+# 销售额
+
+code: sales_amount
+name: 销售额
+industry: fmcg
+
+keywords:
+  - 销售
+  - 销售额
+  - GMV
+  - 营收
+  - 收入
+  - 实收
+
+description: 快消核心指标，统计周期内销售额总和。公式：SUM(实付金额 - 退款金额)。
+
+definition:
+  formula: SUM(order_amount - refund_amount)
+  unit: 元
+  precision: 2
+
+stats:
+  importance: 0.98
+  updated: 2026-05-01

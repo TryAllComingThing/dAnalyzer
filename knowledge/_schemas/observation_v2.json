@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "observation_v2",
+  "title": "Observation Record (v2)",
+  "description": "Per-turn observation recorded at session end. v2 adds context, candidates, and user_anon_id.",
+  "type": "object",
+  "required": ["turn", "query", "industry", "indicators_retrieved", "scenarios_retrieved", "context"],
+  "properties": {
+    "turn": {"type": "integer", "minimum": 1},
+    "query": {"type": "string"},
+    "skill": {"type": "string"},
+    "source": {"enum": ["l1_exact", "l2_match", "l3_fallback"]},
+    "industry": {"type": "string"},
+    "indicators_retrieved": {"type": "array", "items": {"type": "string"}},
+    "indicators_candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "score", "rank"],
+        "properties": {
+          "id": {"type": "string"},
+          "score": {"type": "number", "minimum": 0, "maximum": 1},
+          "rank": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "scenarios_retrieved": {"type": "array", "items": {"type": "string"}},
+    "models_retrieved": {"type": "array", "items": {"type": "string"}},
+    "analysis_type": {"type": "string"},
+    "skill_chain_planned": {"type": "array", "items": {"type": "string"}},
+    "skill_chain_actual": {"type": "array", "items": {"type": "string"}},
+    "template_matched": {"type": ["string", "null"]},
+    "context": {
+      "type": "object",
+      "required": ["time_period", "query_raw", "trigger_source"],
+      "properties": {
+        "time_period": {"enum": ["month_end", "promo_period", "quarter_end", "normal"]},
+        "query_raw": {"type": "string"},
+        "trigger_source": {"enum": ["new_query", "correction", "follow_up"]},
+        "query_intent_hint": {"type": "string"}
+      }
+    },
+    "user_anon_id": {"type": "string", "minLength": 1},
+    "error": {"type": ["string", "null"]}
+  }
+}

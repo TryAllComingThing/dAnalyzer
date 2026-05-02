@@ -19,7 +19,6 @@
 | visual | 可视化 | 7 | 需要生成图表 |
 | dashboard | 仪表盘 | 7 | 需要数据看板 |
 | insight-gen | 洞察生成 | - | 需要自动生成分析洞察 |
-| danalyzer-guide | 入门指南 | - | 新用户入门引导 |
 | context-retriever | 行业数据检索 | - | 需要行业知识注入 |
 
 ## 核心 Skills 说明
@@ -59,8 +58,8 @@
 
 ## 注意事项
 
-1. RFM分析 → 使用 model 技能（子技能: rfm-model.md）
-2. 漏斗分析 → 使用 model 技能（子技能: funnel-model.md）
+1. RFM分析 → 使用 model 技能（子技能: references/rfm-analysis.md）
+2. 漏斗分析 → 使用 model 技能（子技能: references/funnel-analysis.md）
 3. 合规检查 → 使用 security 技能
 4. 高级查询 → 使用 data-query 技能
 5. 所有数据输出必须经过 security 处理

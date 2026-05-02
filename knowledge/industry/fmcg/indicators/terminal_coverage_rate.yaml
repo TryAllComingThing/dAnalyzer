@@ -1,0 +1,24 @@
+# 终端覆盖率
+
+code: terminal_coverage_rate
+name: 终端覆盖率
+industry: fmcg
+
+keywords:
+  - 终端覆盖
+  - 覆盖率
+  - 终端
+  - 网点覆盖
+  - 铺点
+  - 门店覆盖
+
+description: 有销售本品牌/产品的终端门店数占目标区域总终端门店数的比例。快消行业关键分销指标。
+
+definition:
+  formula: COUNT(terminal WHERE has_product = true) / COUNT(total_terminal) * 100
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.82
+  updated: 2026-05-01

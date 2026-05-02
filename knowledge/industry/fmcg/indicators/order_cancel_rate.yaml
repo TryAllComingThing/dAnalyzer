@@ -1,0 +1,22 @@
+# 订单取消率
+
+code: order_cancel_rate
+name: 订单取消率
+industry: fmcg
+
+keywords:
+  - 取消率
+  - 订单取消
+  - 取消订单
+  - 退单率
+
+description: 取消订单数占总订单数的比例。高取消率反映用户体验问题或库存不准。
+
+definition:
+  formula: COUNT(order_id WHERE status='已取消') / COUNT(DISTINCT order_id) * 100
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.75
+  updated: 2026-05-01

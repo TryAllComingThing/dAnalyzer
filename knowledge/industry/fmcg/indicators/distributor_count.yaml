@@ -1,0 +1,23 @@
+# 经销商数量
+
+code: distributor_count
+name: 经销商数量
+industry: fmcg
+
+keywords:
+  - 经销商
+  - 经销商数
+  - 代理商
+  - 分销商
+  - 渠道商
+
+description: 活跃经销商总数。快消行业依赖多层分销网络，经销商数量反映渠道覆盖深度和管理复杂度。
+
+definition:
+  formula: COUNT(DISTINCT distributor_id WHERE status = 'active')
+  unit: 个
+  precision: 0
+
+stats:
+  importance: 0.75
+  updated: 2026-05-01

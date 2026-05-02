@@ -1,130 +1,104 @@
-# 企业级数分静态资产库 (data)
+# 领域知识资产库 (knowledge)
 
 ## 目录用途
 
-企业级数分静态资产库，统一归档可复用的标准化资产。主要包括：
-
-- **指标资产（indicator）**：指标字典、口径定义、统计规则
-- **模板资产（template）**：SQL模板、报表模板、可视化模板
-- **模型资产（model）**：行业分析模型、归因框架
-- **样本资产（sample）**：标准样本库、异常样本库
-
-> 注：从ecc-data的assets重命名为data，以符合Plugin规范
+企业级数分领域知识资产库，统一归档可复用的标准化资产。
 
 ## 目录结构
 
 ```
-data/
-├── indicator/       # 指标资产 (8个)
-│   ├── core-indicator-dict.md
-│   ├── custom-indicator.md
-│   ├── finance-indicator.md
-│   ├── marketing-indicator.md
-│   ├── operation-indicator.md
-│   ├── product-indicator.md
-│   ├── sales-indicator.md
-│   └── user-indicator.md
-├── model/            # 模型资产 (9个)
+knowledge/
+├── industry/              # 行业配置
+│   └── fmcg/              # 快消行业 (FMCG)
+│       ├── config.yaml        # 行业配置
+│       ├── preferences.yaml   # 用户偏好
+│       ├── indicators/        # 指标字典 (38个)
+│       ├── scenarios/         # 分析场景 (12个)
+│       └── mappings/          # 字段映射
+├── model/                 # 分析模型 (5个)
 │   ├── aarrr-model.md
-│   ├── attribution-model.md
 │   ├── cohort-model.md
-│   ├── funnel-model.md
 │   ├── prediction-model.md
-│   ├── rfm-model.md
 │   ├── scoring-model.md
-│   ├── segmentation-model.md
-│   └── correlation-analysis.md
-├── template/         # 模板资产 (6个)
+│   └── segmentation-model.md
+├── template/              # 模板资产 (6个)
 │   ├── common-sql-template.md
 │   ├── export-template.md
 │   ├── funnel-sql-template.md
 │   ├── report-template.md
 │   ├── time-analysis-template.md
 │   └── user-analysis-template.md
-└── sample/          # 样本资产 (5个)
-    ├── standard-data-sample.md
-    ├── abnormal-data-sample.md
-    ├── report-sample.md
-    ├── sql-example-sample.md
-    └── test-case-sample.md
+└── intent-routing.yaml    # 意图路由映射
 ```
 
-## 资产列表 (28个)
+## 快消行业 (FMCG)
 
-### indicator (指标资产) - 8个
-| 资产 | 说明 |
-|------|------|
-| core-indicator-dict | 核心指标字典 |
-| custom-indicator | 自定义指标 |
-| finance-indicator | 财务指标 |
-| marketing-indicator | 营销指标 |
-| operation-indicator | 运营指标 |
-| product-indicator | 产品指标 |
-| sales-indicator | 销售指标 |
-| user-indicator | 用户指标 |
+### 指标分类 (38个)
 
-### model (模型资产) - 9个
-| 资产 | 说明 |
-|------|------|
-| aarrr-model | AARRR模型 |
-| attribution-model | 归因模型 |
-| cohort-model | 同期群模型 |
-| funnel-model | 漏斗模型 |
-| prediction-model | 预测模型 |
-| rfm-model | RFM模型 |
-| scoring-model | 评分模型 |
-| segmentation-model | 用户分群模型 |
-| correlation-analysis | 相关性分析 |
+| 分类 | 指标 | code | 说明 |
+|------|------|------|------|
+| 销售与收入 | 销售额 | sales_amount | 核心收入指标 |
+| | 销售量 | sales_volume | 销售件数 |
+| | 毛利额 | gross_profit | 直接盈利 |
+| | 毛利率 | gross_margin_rate | 盈利水平 |
+| | 净利润额 | net_profit | 最终利润 |
+| | 净利率 | net_margin_rate | 净利占比 |
+| | 折扣率 | discount_rate | 折让占比 |
+| | 客单价 | avg_order_value | 笔均金额 |
+| | 连带率 | avg_basket_size | 笔均件数 |
+| 订单与服务 | 订单量 | order_count | 核心交易量 |
+| | 订单ID | order_id | 交易标识 |
+| | 订单取消率 | order_cancel_rate | 取消比例 |
+| | 退货率 | return_rate | 退货比例 |
+| | 准时交付率 | delivery_on_time_rate | 配送时效 |
+| 商品与库存 | SKU数量 | sku_count | 品类宽度 |
+| | 动销率 | sell_through_rate | 有销SKU占比 |
+| | 新品占比 | new_sku_ratio | 新品贡献 |
+| | 缺货率 | out_of_stock_rate | 库存不足 |
+| | 库存周转率 | inventory_turnover | 库存效率 |
+| | 库存周转天数 | inventory_days | 库存消化 |
+| | 产品不良率 | product_defect_rate | 品控水平 |
+| 用户与客户 | 用户ID | user_id | 消费者标识 |
+| | 新增用户数 | new_user_count | 拉新能力 |
+| | 活跃用户数 | active_user_count | 用户活跃度 |
+| | 用户留存率 | user_retention_rate | 用户粘性 |
+| | 复购率 | repurchase_rate | 品牌忠诚 |
+| | 会员数 | member_count | 会员规模 |
+| | 客户终身价值 | clv | 客户总贡献 |
+| 流量与营销 | 转化率 | conversion_rate | 访客到下单 |
+| | 访问量 | visit_count | 流量规模 |
+| | 促销ROI | promotion_roi | 促销回报 |
+| | 优惠券使用率 | coupon_usage_rate | 券核销率 |
+| | 获客成本 | customer_acquisition_cost | 拉新费用 |
+| 渠道与分销 | 渠道收入占比 | channel_revenue_share | 各渠道贡献 |
+| | 终端覆盖率 | terminal_coverage_rate | 网点覆盖 |
+| | 铺货率 | distribution_penetration | 上架覆盖 |
+| | 经销商数量 | distributor_count | 渠道规模 |
+| 其他 | 状态 | status | 订单/商品状态 |
 
-### template (模板资产) - 6个
-| 资产 | 说明 |
-|------|------|
-| common-sql-template | 通用SQL模板 |
-| export-template | 导出模板 |
-| funnel-sql-template | 漏斗SQL模板 |
-| report-template | 报告模板 |
-| time-analysis-template | 时间分析模板 |
-| user-analysis-template | 用户分析模板 |
+### 分析场景 (12个)
 
-### sample (样本资产) - 5个
-| 资产 | 说明 |
-|------|------|
-| standard-data-sample | 标准数据样本 |
-| abnormal-data-sample | 异常数据样本 |
-| report-sample | 报告样本 |
-| sql-example-sample | SQL示例样本 |
-| test-case-sample | 测试用例样本 |
+| 场景 | code | 说明 |
+|------|------|------|
+| 销售趋势 | sales_trend | 时间维度销售分析 |
+| 品类分析 | category_analysis | 品类结构/排名/动销 |
+| 渠道分析 | channel_analysis | 渠道效能/占比 |
+| 用户分析 | user_analysis | 消费者画像/复购 |
+| 促销效果 | promotion_analysis | 活动ROI/券核销 |
+| 库存分析 | inventory_analysis | 周转/缺货/滞销 |
+| 利润分析 | profit_analysis | 毛利/净利/亏损 |
+| 客户价值 | customer_value_analysis | 分层/CLV/留存 |
+| 退货分析 | return_analysis | 退货率/原因/损失 |
+| 区域分析 | regional_analysis | 区域销售/覆盖 |
+| 新品分析 | new_product_analysis | 新品贡献/存活 |
+| 购物篮分析 | market_basket_analysis | 关联购买/连带 |
 
 ## 调用规范
 
-### 路径格式
-```
-data/[资产类型]/[文件名].md
-```
+- 数据读取通过 Connector 统一接口，禁止直接 find/grep knowledge/
+- 行业上下文检索通过 `python scripts/retrieve_context.py`
+- 动态注册表通过 `python scripts/registry_scanner.py`
 
-### 调用要求
-1. 技能、流程调用资产时，确保**资产口径、格式统一**
-2. 资产变更需遵循**版本管理规范**
-3. 资产可被Agent、调度器、流程、CLI快捷指令调用
+## 版本
 
-## 资产版本管理
-
-1. 资产更新需标注版本号（如v1.0、v1.1）
-2. 旧版本通过 git 历史管理，不单独维护 version 副本
-3. CLI优先调用最新版本资产
-4. 回滚时记录回滚日志
-
-## 文件统计
-
-- indicator: 8个
-- model: 9个
-- template: 6个
-- sample: 5个
-- **总计: 28个md文件**
-
-## 注意事项
-
-1. 资产口径必须与指标字典保持一致
-2. 模板资产支持参数替换
-3. 样本数据需脱敏处理
-4. 资产变更需通知相关方
+- v4.0 - 2026-05-01 — 快消行业大幅扩充（38指标 + 12场景）

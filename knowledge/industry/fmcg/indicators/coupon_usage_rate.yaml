@@ -1,0 +1,23 @@
+# 优惠券使用率
+
+code: coupon_usage_rate
+name: 优惠券使用率
+industry: fmcg
+
+keywords:
+  - 优惠券
+  - 券使用率
+  - 领券
+  - 用券
+  - 核销率
+
+description: 已使用的优惠券数占已发放优惠券数的比例。反映促销吸引力和优惠券策略有效性。
+
+definition:
+  formula: COUNT(coupon_id WHERE status='已使用') / COUNT(coupon_id WHERE status IN ('已领取','已使用')) * 100
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.75
+  updated: 2026-05-01

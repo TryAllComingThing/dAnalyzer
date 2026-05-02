@@ -1,209 +1,68 @@
 #!/usr/bin/env bash
 # learn/hooks/session-summary
-# Stop Hook - 会话总结，触发模式检测
+# Stop Hook - 会话结束时调用 Python session_processor 进行信号检测。
+#
+# 流程:
+# 1. 加载 session observation JSONL
+# 2. 运行 4 类信号检测器（correction / reinforcement / counterfactual / preference）
+# 3. 写入信号 JSONL + 计数器
+# 4. 输出学习摘要
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 LEARN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-
 SESSION_ID="${CLAUDE_SESSION_ID:-default}"
-SESSION_DIR="${LEARN_ROOT}/data/observations/sessions"
+OBS_DIR="${LEARN_ROOT}/data/observations/sessions"
+SIGNALS_DIR="${LEARN_ROOT}/data/signals"
+COUNTERS_DIR="${LEARN_ROOT}/data/counters"
 
 # ============================================
-# 统计函数
+# 快速路径：无 observation 则跳过
 # ============================================
+obs_file="${OBS_DIR}/${SESSION_ID}.jsonl"
+if [ ! -f "$obs_file" ] || [ ! -s "$obs_file" ]; then
+    echo "#[dAnalyzer Learning] No observations recorded for session ${SESSION_ID}"
+    exit 0
+fi
 
-# 统计观察数量
-count_observations() {
-    local session_file="$1"
-    if [ -f "$session_file" ]; then
-        wc -l < "$session_file" 2>/dev/null || echo "0"
-    else
-        echo "0"
-    fi
-}
-
-# 统计 Skill 调用次数
-count_skill_calls() {
-    local session_file="$1"
-    if [ -f "$session_file" ]; then
-        grep -c '"type":"query"' "$session_file" 2>/dev/null || echo "0"
-    else
-        echo "0"
-    fi
-}
-
-# 统计查询次数
-count_queries() {
-    local session_file="$1"
-    if [ -f "$session_file" ]; then
-        grep -c '"type":"query"' "$session_file" 2>/dev/null || echo "0"
-    else
-        echo "0"
-    fi
-}
-
-# 统计分析次数
-count_analyses() {
-    local session_file="$1"
-    if [ -f "$session_file" ]; then
-        grep -c '"type":"analysis"' "$session_file" 2>/dev/null || echo "0"
-    else
-        echo "0"
-    fi
-}
-
-# 统计输出次数
-count_outputs() {
-    local session_file="$1"
-    if [ -f "$session_file" ]; then
-        grep -c '"type":"output"' "$session_file" 2>/dev/null || echo "0"
-    else
-        echo "0"
-    fi
-}
-
-# 统计错误次数
-count_errors() {
-    local session_file="$1"
-    if [ -f "$session_file" ]; then
-        grep -c '"type":"error"' "$session_file" 2>/dev/null || echo "0"
-    else
-        echo "0"
-    fi
-}
-
-# 获取使用的 Skill 列表
-get_skills_used() {
-    local session_file="$1"
-    if [ -f "$session_file" ]; then
-        grep -oP '"skill":"[^"]+"' "$session_file" | sed 's/"skill":"//;s/"//g' | sort -u | tr '\n' ',' | sed 's/,$//'
-    else
-        echo ""
-    fi
-}
-
-# 获取分析指标
-get_indicators_used() {
-    local session_file="$1"
-    if [ -f "$session_file" ]; then
-        grep -oP '"indicators":"[^"]*"' "$session_file" | sed 's/"indicators":"//;s/"//g' | tr ',' '\n' | sort -u | grep -v '^$' | tr '\n' ',' | sed 's/,$//'
-    else
-        echo ""
-    fi
-}
-
-# 获取分析维度
-get_dimensions_used() {
-    local session_file="$1"
-    if [ -f "$session_file" ]; then
-        grep -oP '"dimensions":"[^"]*"' "$session_file" | sed 's/"dimensions":"//;s/"//g' | tr ',' '\n' | sort -u | grep -v '^$' | tr '\n' ',' | sed 's/,$//'
-    else
-        echo ""
-    fi
-}
+obs_count=$(wc -l < "$obs_file" | tr -d ' ')
+echo "#[dAnalyzer Learning] Session ${SESSION_ID}: ${obs_count} observations recorded"
 
 # ============================================
-# 生成会话总结
+# 调用 Python session_processor
 # ============================================
+python3 -c "
+import json, sys
+from pathlib import Path
 
-generate_summary() {
-    local session_file="${SESSION_DIR}/${SESSION_ID}.jsonl"
+sys.path.insert(0, '${LEARN_ROOT}/..')
 
-    if [ ! -f "$session_file" ]; then
-        echo "#[dAnalyzer Learning] No observations recorded for session $SESSION_ID"
-        return
-    fi
+from learn.ingest.session_processor import process_session, load_observations
 
-    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-    local obs_count=$(count_observations "$session_file")
-    local query_count=$(count_queries "$session_file")
-    local analysis_count=$(count_analyses "$session_file")
-    local output_count=$(count_outputs "$session_file")
-    local error_count=$(count_errors "$session_file")
-    local skills_used=$(get_skills_used "$session_file")
-    local indicators_used=$(get_indicators_used "$session_file")
-    local dimensions_used=$(get_dimensions_used "$session_file")
+observations = load_observations('${obs_file}')
+if not observations:
+    print('#[dAnalyzer Learning] No observations to process')
+    sys.exit(0)
 
-    # 写入汇总文件
-    local summary_file="${SESSION_DIR}/${SESSION_ID}_summary.json"
-    cat > "$summary_file" <<EOF
-{
-  "session_id": "$SESSION_ID",
-  "timestamp": "$timestamp",
-  "summary": {
-    "total_observations": $obs_count,
-    "query_count": $query_count,
-    "analysis_count": $analysis_count,
-    "output_count": $output_count,
-    "error_count": $error_count,
-    "skills_used": "$skills_used",
-    "indicators_used": "$indicators_used",
-    "dimensions_used": "$dimensions_used"
-  },
-  "trigger_pattern_detector": true
-}
-EOF
+signals, counter = process_session(
+    session_id='${SESSION_ID}',
+    observations=observations,
+    signals_dir='${SIGNALS_DIR}',
+    counters_dir='${COUNTERS_DIR}',
+)
 
-    # 输出学习摘要
-    echo "#[dAnalyzer Learning] Session $SESSION_ID completed"
-    echo "#[dAnalyzer Learning] Observations: $obs_count | Queries: $query_count | Analyses: $analysis_count | Outputs: $output_count | Errors: $error_count"
-    if [ -n "$skills_used" ]; then
-        echo "#[dAnalyzer Learning] Skills used: $skills_used"
-    fi
+# 输出摘要
+by_type = {}
+for s in signals:
+    by_type[s.type.value] = by_type.get(s.type.value, 0) + 1
 
-    # 检查是否需要触发 Pattern Detector
-    check_trigger_detector "$obs_count"
-}
+print(f'#[dAnalyzer Learning] Signals detected: {len(signals)} total')
+for t, c in sorted(by_type.items()):
+    print(f'#[dAnalyzer Learning]   {t}: {c}')
+print(f'#[dAnalyzer Learning] Counter: queries={counter.total_queries} l1={counter.l1_hits} l2={counter.l2_hits} l3={counter.l3_fallbacks}')
+" 2>&1
 
-# 检查是否触发模式检测
-check_trigger_detector() {
-    local obs_count="$1"
-    local config_file="${LEARN_ROOT}/data/config.yaml"
-    local trigger_interval=50
-
-    # 从配置读取触发间隔
-    if [ -f "$config_file" ]; then
-        if grep -q "trigger_interval:" "$config_file"; then
-            trigger_interval=$(grep "trigger_interval:" "$config_file" | sed 's/.*: *//' | tr -d ' ')
-        fi
-    fi
-
-    # 达到触发阈值
-    if [ "$obs_count" -ge "$trigger_interval" ]; then
-        echo "#[dAnalyzer Learning] Observation threshold reached ($obs_count >= $trigger_interval). Pattern detection recommended."
-        echo "#[dAnalyzer Learning] Run: Skill: pattern-detector"
-    fi
-}
-
-# 更新总索引
-update_global_index() {
-    local index_file="${LEARN_ROOT}/data/observations/index.json"
-    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-    local session_file="${SESSION_DIR}/${SESSION_ID}.jsonl"
-
-    if [ -f "$session_file" ]; then
-        local total_obs=$(wc -l < "$session_file")
-        local session_count=$(ls -1 "${SESSION_DIR}"/*.jsonl 2>/dev/null | wc -l | tr -d ' ')
-
-        if [ -f "$index_file" ]; then
-            # 更新统计
-            sed -i "s/\"total_observations\": [0-9]*/\"total_observations\": $total_obs/" "$index_file" 2>/dev/null || true
-            sed -i "s/\"last_updated\": \"[^\"]*\"/\"last_updated\": \"$timestamp\"/" "$index_file" 2>/dev/null || true
-        fi
-    fi
-}
-
-# ============================================
-# 主逻辑
-# ============================================
-
-main() {
-    generate_summary
-    update_global_index
-}
-
-main
+echo "#[dAnalyzer Learning] Session ${SESSION_ID} processing complete"
 
 exit 0

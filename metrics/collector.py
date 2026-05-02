@@ -9,7 +9,7 @@ SQLite 持久化，记录:
 用法:
     collector = MetricsCollector()
     collector.record_run({
-        "pipeline": "ecommerce",
+        "pipeline": "fmcg",
         "query": "各品类 GMV",
         "timing": {"total_ms": 1234, "breakdown": {...}},
         "retrieval": {"indicators": 3, "scenarios": 2, "top_score": 0.85},
@@ -32,7 +32,7 @@ class MetricsCollector:
 
     def __init__(self, db_path: str = None):
         self.db_path = db_path or str(
-            Path(__file__).resolve().parent.parent / "data" / "metrics.db"
+            Path(__file__).resolve().parent / "metrics.db"
         )
         self._ensure_tables()
 

@@ -1,0 +1,77 @@
+# knowledge/_schemas/hypothesis_v2.yaml
+# 假设 Schema v2 — V4 自进化系统
+# 所有假设在写入/加载时校验此 schema
+
+schema_version: 2
+
+required_fields:
+  - id
+  - type
+  - industry
+  - evidence
+  - confidence
+  - status
+  - created_at
+
+types:
+  enum:
+    - keyword_adjustment       # 术语映射调整
+    - indicator_weight          # 指标权重调整（替代 v3 indicator_priority）
+    - indicator_combination     # 指标组合扩展
+    - template_routing          # 模板路由权重
+    - template_content          # 模板内容进化
+    - template_discovery        # 模板沉淀（新模板）
+    - intent_new                # 新建 intent
+    - preference_chart          # 图表偏好（v4 新增）
+    - preference_report         # 报告偏好（v4 新增）
+
+confidence:
+  type: float
+  range: [0.0, 1.0]
+  description: 三维加权置信度（频次×0.35 + 一致性×0.30 + 多样性×0.20 + 邻近加分×0.15）
+
+validated_confidence:
+  type: float
+  range: [0.0, 1.0]
+  description: = confidence × pass_rate（hold-out 回测通过率）
+  constraint: "must be <= confidence"
+
+status:
+  enum:
+    - pending_validation
+    - full_applied              # >= 0.90 直接生效
+    - progressive               # >= 0.70 渐进爬坡中
+    - mature                    # 爬坡到 validated_confidence
+    - frozen                    # 连续退化，权重冻结
+    - defunct                   # 连续冻结，权重清零
+    - discarded                 # < 0.70 丢弃
+    - draft                     # 草稿模板/草稿 intent
+
+evidence:
+  required:
+    - signal_type
+    - signal_ids
+    - frequency
+    - period_days
+    - unique_sessions
+  optional:
+    - user_diversity_ratio      # 信号来源用户分布
+
+target:
+  required:
+    - layer                     # canonical | template | routing
+    - file
+    - path
+  optional:
+    - field
+
+operations:
+  description: 应用此假设的变更操作列表
+  items:
+    required: [op, target]
+    properties:
+      op: [adjust_weight, add_indicator, demote_indicator, promote_indicator, add_step, toggle_optional, create_draft]
+      target: string
+      delta: float
+      current_weight: float
+      max_weight: float

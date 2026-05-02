@@ -1,71 +1,123 @@
-# 通用字段映射
+# 快消行业字段映射
 
-id: base_map_001
 code: common_mapping
-name: 通用字段映射
+name: 快消字段映射
 type: mapping
-industry: _base
+industry: fmcg
 
 keywords:
   - 字段
   - 映射
   - mapping
-  - 通用
-  - common
 
-description: |
-  通用字段映射定义。
-  定义跨行业通用的标准字段名称。
+description: 快消行业标准字段名到常见别名映射。
 
 mappings:
-  # 时间相关
-  created_at:
-    - created_at
-    - create_time
-    - gmt_create
-    - ctime
-
-  updated_at:
-    - updated_at
-    - update_time
-    - gmt_modified
-    - mtime
-
-  # 用户相关
   user_id:
     - user_id
     - customer_id
     - member_id
-    - uid
     - buyer_id
-    - user_no
+    - consumer_id
 
-  # 订单相关
   order_id:
     - order_id
     - order_no
     - transaction_id
-    - biz_order_id
-    - order_no
+    - bill_id
 
-  # 金额相关
-  amount:
-    - amount
-    - total_amount
+  sales_amount:
+    - sales_amount
     - order_amount
     - pay_amount
-    - money
-    - fee
+    - gmv
+    - revenue
+    - actual_amount
 
-  # 状态相关
+  sales_volume:
+    - sales_volume
+    - quantity
+    - qty
+    - sold_qty
+    - sales_qty
+
+  cost_amount:
+    - cost_amount
+    - cost
+    - purchase_cost
+    - cogs
+    - cost_price
+
+  discount_amount:
+    - discount_amount
+    - discount
+    - coupon_amount
+    - promotion_discount
+    - price_off
+
+  sku_id:
+    - sku_id
+    - product_id
+    - item_id
+    - goods_id
+    - barcode
+    - upc
+
+  category:
+    - category
+    - category_name
+    - cate_name
+    - product_category
+    - cate_level1
+
+  channel:
+    - channel
+    - channel_name
+    - sales_channel
+    - distribution_channel
+    - channel_type
+
+  region:
+    - region
+    - area
+    - province
+    - city
+    - district
+    - sales_region
+
+  distributor_id:
+    - distributor_id
+    - dealer_id
+    - agent_id
+    - partner_id
+
+  terminal_id:
+    - terminal_id
+    - store_id
+    - shop_id
+    - outlet_id
+    - retail_id
+
+  promotion_id:
+    - promotion_id
+    - campaign_id
+    - activity_id
+    - event_id
+
   status:
     - status
-    - state
     - order_status
-    - pay_status
-    - deliver_status
+    - state
+    - delivery_status
+
+  inventory:
+    - inventory
+    - stock
+    - stock_qty
+    - inventory_qty
+    - on_hand_qty
 
 stats:
-  usage_count: 600
+  usage_count: 0
   importance: 0.95
-  updated: 2026-04-26
+  updated: 2026-05-01

@@ -1,23 +1,26 @@
 ---
 name: error-handler
-description: 异常处理 Agent — 错误类型分析、重试/降级/中止决策
-tools: ['Read', 'Grep', 'Write', 'AskUserQuestion']
+description: 异常处理参考文档 — 错误类型分析与处理策略表（不参与运行时 spawn）
 color: red
 ---
 
-# error-handler — 异常处理 Agent
+# error-handler — 异常处理（参考文档）
+
+> **本文档为参考用途，不参与运行时 spawn。**
+> 错误处理决策已内置于 danalyzer-core Section V 策略表，danalyzer Agent 自行查表执行。
+> 如未来引入需要独立上下文探查的复杂错误场景，可重新评估 spawn 机制。
 
 ## 职责
 
-dAnalyzer 执行链路中的异常处理单元。被 danalyzer-core 在技能执行异常时 spawn，负责：
+dAnalyzer 执行链路中的异常处理参考。本文档汇总：
 
-1. 接收错误上下文（出错的技能、错误类型、原始请求）
-2. 按错误类型匹配处理策略
-3. 输出处理决策（retry / skip / degrade / abort）
+1. 错误类型与处理策略的完整映射
+2. 决策语义说明
+3. 注意事项
 
 ## 错误处理策略
 
-策略定义在 `skills/danalyzer-core/SKILL.md` 第五节，本 Agent 执行时按需读取该文件。
+核心策略定义在 `skills/danalyzer-core/SKILL.md` 第五节，本文档为人类可读的补充说明。
 
 | 错误类型 | 严重程度 | 默认策略 | 可选策略 |
 |----------|----------|----------|----------|

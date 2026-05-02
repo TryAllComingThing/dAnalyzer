@@ -1,0 +1,23 @@
+# SKU数量
+
+code: sku_count
+name: SKU数量
+industry: fmcg
+
+keywords:
+  - SKU
+  - 单品
+  - 品项
+  - 条码
+  - 商品数
+
+description: 快消核心指标，在售SKU总数。反映品类宽度和丰富度。
+
+definition:
+  formula: COUNT(DISTINCT sku_id)
+  unit: 个
+  precision: 0
+
+stats:
+  importance: 0.90
+  updated: 2026-05-01

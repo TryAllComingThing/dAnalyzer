@@ -1,0 +1,24 @@
+# 访问量
+
+code: visit_count
+name: 访问量
+industry: fmcg
+
+keywords:
+  - 访问
+  - 流量
+  - 访客
+  - PV
+  - UV
+  - 浏览
+
+description: 统计周期内访问店铺/商品页面的用户数(UV)或次数(PV)。流量是一切转化的基础，快消行业关注UV/PV比值判断浏览深度。
+
+definition:
+  formula: COUNT(DISTINCT visitor_id)
+  unit: 人
+  precision: 0
+
+stats:
+  importance: 0.85
+  updated: 2026-05-01

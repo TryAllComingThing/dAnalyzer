@@ -1,0 +1,23 @@
+# 净利润额
+
+code: net_profit
+name: 净利润额
+industry: fmcg
+
+keywords:
+  - 净利润
+  - 净利
+  - 纯利润
+  - 最终利润
+  - 净利润额
+
+description: 扣除所有成本（商品成本、物流、营销、管理、税费等）后的最终利润。衡量企业整体盈利水平。
+
+definition:
+  formula: SUM(sales_amount - cost_amount - marketing_cost - logistics_cost - admin_cost - tax)
+  unit: 元
+  precision: 2
+
+stats:
+  importance: 0.88
+  updated: 2026-05-01

@@ -1,0 +1,22 @@
+# 动销率
+
+code: sell_through_rate
+name: 动销率
+industry: fmcg
+
+keywords:
+  - 动销
+  - 动销率
+  - 有销
+  - 滞销
+
+description: 快消核心指标，有销售的SKU数 / 总SKU数。衡量品类健康度。
+
+definition:
+  formula: COUNT(DISTINCT sku_with_sales) / COUNT(DISTINCT total_sku)
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.88
+  updated: 2026-05-01

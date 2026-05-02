@@ -1,0 +1,22 @@
+# 会员数
+
+code: member_count
+name: 会员数
+industry: fmcg
+
+keywords:
+  - 会员
+  - 会员数
+  - 注册会员
+  - 付费会员
+
+description: 注册会员总数。快消行业通过会员体系提升用户粘性和LTV。含普通会员和付费会员。
+
+definition:
+  formula: COUNT(DISTINCT user_id WHERE is_member = true)
+  unit: 人
+  precision: 0
+
+stats:
+  importance: 0.80
+  updated: 2026-05-01

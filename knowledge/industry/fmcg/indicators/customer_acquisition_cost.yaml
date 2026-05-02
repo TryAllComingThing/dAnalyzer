@@ -1,0 +1,23 @@
+# 获客成本
+
+code: customer_acquisition_cost
+name: 获客成本
+industry: fmcg
+
+keywords:
+  - 获客成本
+  - CAC
+  - 拉新成本
+  - 获客费用
+  - 营销成本
+
+description: 获取一个新客户的平均花费。CAC = 总营销费用 / 新增客户数。快消行业通过高复购率摊薄CAC。
+
+definition:
+  formula: SUM(marketing_cost) / COUNT(DISTINCT new_user_id)
+  unit: 元/人
+  precision: 2
+
+stats:
+  importance: 0.84
+  updated: 2026-05-01

@@ -1,0 +1,40 @@
+# 新品分析
+
+code: new_product_analysis
+name: 新品分析
+industry: fmcg
+
+keywords:
+  - 新品
+  - 上市
+  - 新品上市
+  - 新品表现
+  - 新品跟踪
+
+description: |
+  新品上市表现追踪，包含:
+  - 新品销售额贡献及趋势
+  - 新品动销率（vs 老品）
+  - 新品铺货进度
+  - 新品复购率
+  - 新品存活率评估（上市90天/180天）
+
+content:
+  required:
+    - new_sku_ratio
+    - sell_through_rate
+    - sales_amount
+  optional:
+    - distribution_penetration
+    - repurchase_rate
+    - inventory_turnover
+  dimensions:
+    新品批次: [各上市批次]
+    品类: [各品类]
+    渠道: [各渠道]
+    上市时长: [30天, 60天, 90天, 180天]
+
+stats:
+  usage_count: 0
+  satisfaction: 0.83
+  updated: 2026-05-01

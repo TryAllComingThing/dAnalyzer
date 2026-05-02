@@ -45,6 +45,96 @@ class IndustryRetriever:
         # 初始化 FTS5
         self._ensure_fts()
 
+        # 构建领域关键词词典（从指标/场景 keywords + name 提取）
+        self._domain_keywords = None
+        self._build_domain_dictionary()
+
+    # ==================== 领域关键词词典 ====================
+
+    def _build_domain_dictionary(self):
+        """
+        构建领域关键词词典 — 从指标/场景的 keywords + name 提取。
+        按长度降序排列，用于最大正向匹配分词。
+        """
+        keywords = set()
+        try:
+            for ind in self.store.get_all_indicators():
+                keywords.add(ind.get("name", ""))
+                kw = ind.get("keywords", [])
+                if isinstance(kw, str):
+                    try:
+                        kw = json.loads(kw)
+                    except json.JSONDecodeError:
+                        kw = []
+                for k in kw:
+                    if isinstance(k, str) and len(k) >= 2:
+                        keywords.add(k)
+            for scn in self.store.get_all_scenarios():
+                keywords.add(scn.get("name", ""))
+                kw = scn.get("keywords", [])
+                if isinstance(kw, str):
+                    try:
+                        kw = json.loads(kw)
+                    except json.JSONDecodeError:
+                        kw = []
+                for k in kw:
+                    if isinstance(k, str) and len(k) >= 2:
+                        keywords.add(k)
+        except Exception:
+            pass
+
+        # 补一些快消领域通用词
+        keywords.update({
+            "销售额", "订单量", "转化率", "客单价", "复购率",
+            "毛利率", "净利率", "动销率", "退货率", "缺货率",
+            "同比", "环比", "增长", "下降", "趋势", "排名",
+            "占比", "对比", "分析", "统计", "查看",
+        })
+
+        self._domain_keywords = sorted(keywords, key=lambda k: -len(k))
+
+    def _extract_domain_keywords(self, query: str) -> list[str]:
+        """
+        领域感知关键词提取 — 最大正向匹配 + 子串补全。
+
+        1. 最大正向匹配提取领域词
+        2. 子串补全：若匹配到长词"新品上市"，同时补入短词"新品"（若在词典中）
+
+        示例:
+            "各品类GMV下降了怎么办" → ["品类", "GMV", "下降"]
+            "新品上市表现怎么样" → ["新品上市", "新品"]
+            "库存周转天数和缺货率" → ["库存周转天数", "库存", "周转", "缺货率"]
+        """
+        if not query or not self._domain_keywords:
+            return []
+
+        # 先按长度降序匹配
+        matched = []
+        i = 0
+        while i < len(query):
+            best = None
+            for kw in self._domain_keywords:
+                kw_len = len(kw)
+                if i + kw_len <= len(query) and query[i:i + kw_len] == kw:
+                    best = kw
+                    break
+            if best:
+                if best not in matched:
+                    matched.append(best)
+                i += len(best)
+            else:
+                i += 1
+
+        # 子串补全：检查已匹配的长词是否包含更短的领域词
+        extra = []
+        for m in matched:
+            for kw in self._domain_keywords:
+                if len(kw) >= 2 and kw != m and kw in m:
+                    extra.append(kw)
+        matched.extend(kw for kw in extra if kw not in matched)
+
+        return matched
+
     # ==================== FTS5 初始化 ====================
 
     def _ensure_fts(self):
@@ -96,23 +186,31 @@ class IndustryRetriever:
             conn.close()
 
     def _populate_fts(self, conn: sqlite3.Connection):
-        """填充 FTS5 数据"""
+        """填充 FTS5 数据 — keywords 转为纯文本（去掉 JSON 格式字符）"""
         try:
-            # 填充指标
             indicators = conn.execute("SELECT code, name, keywords, description FROM indicators").fetchall()
             for ind in indicators:
                 keywords = ind[2] or ""
                 if isinstance(keywords, str):
-                    pass  # 保持字符串
+                    try:
+                        kw_list = json.loads(keywords)
+                        keywords = " ".join(str(k) for k in kw_list)
+                    except (json.JSONDecodeError, TypeError):
+                        pass
                 conn.execute("""
                     INSERT INTO indicators_fts (code, name, keywords, description)
                     VALUES (?, ?, ?, ?)
                 """, (ind[0], ind[1], keywords, ind[3] or ""))
 
-            # 填充场景
             scenarios = conn.execute("SELECT code, name, keywords, description FROM scenarios").fetchall()
             for scn in scenarios:
                 keywords = scn[2] or ""
+                if isinstance(keywords, str):
+                    try:
+                        kw_list = json.loads(keywords)
+                        keywords = " ".join(str(k) for k in kw_list)
+                    except (json.JSONDecodeError, TypeError):
+                        pass
                 conn.execute("""
                     INSERT INTO scenarios_fts (code, name, keywords, description)
                     VALUES (?, ?, ?, ?)
@@ -190,24 +288,27 @@ class IndustryRetriever:
         finally:
             conn.close()
 
-    def _prepare_fts_query(self, query: str) -> str:
-        """预处理 FTS5 查询"""
-        # 分词
+    def _prepare_fts_query(self, query: str, domain_keywords: list[str] = None) -> str:
+        """
+        预处理 FTS5 查询 — 领域关键词精确匹配。
+
+        仅使用提取出的领域关键词构建 FTS 查询。
+        原始中文 query 不经分词直接送 FTS 会产生整句匹配噪声，
+        因此原始 query 走语义流（向量检索），FTS 流只用领域词。
+
+        示例:
+            query="各品类GMV下降了怎么办", keywords=["品类", "GMV", "下降"]
+            → '"品类" OR "GMV" OR "下降"'
+        """
+        if domain_keywords:
+            parts = [f'"{kw}"' for kw in domain_keywords if len(kw) >= 2]
+            if parts:
+                return " OR ".join(parts)
+
+        # 无领域词时，用简单正则分词兜底
         tokens = re.findall(r"[\w一-鿿]+", query.lower())
-
-        if not tokens:
-            return query
-
-        # 构建 FTS5 查询
-        # 使用 OR 连接，支持部分匹配
-        fts_parts = []
-        for token in tokens:
-            if len(token) > 1:
-                fts_parts.append(f'"{token}"*')
-            else:
-                fts_parts.append(token)
-
-        return " OR ".join(fts_parts)
+        fts_parts = [f'"{t}"' for t in tokens if len(t) >= 2]
+        return " OR ".join(fts_parts) if fts_parts else query
 
     # ==================== LIKE 回退 ====================
 
@@ -431,10 +532,15 @@ class IndustryRetriever:
         use_mmr: bool = False
     ) -> Dict[str, List[Dict]]:
         """
-        统一检索接口 (高级版)
+        统一检索接口 — 领域关键词 + 语义混合检索
+
+        双流并行:
+        - 关键词流: 提取领域词 → FTS5 精确匹配
+        - 语义流: 完整 query → N-gram 向量检索
+        - 融合: RRF 合并两流结果
 
         Args:
-            query: 查询关键词
+            query: 用户原始查询
             top_k: 返回数量
             use_fts: 使用 FTS5 全文搜索
             use_vector: 使用向量检索
@@ -447,24 +553,32 @@ class IndustryRetriever:
                 "indicators": [...],
                 "scenarios": [...],
                 "query": query,
-                "method": "fts+vector+rrf"  # 使用的检索方法
+                "method": "fts+vector+rrf",
+                "keywords": [...],
+                "scores": {...}
             }
         """
         methods = []
 
-        # FTS5 检索
+        # 领域关键词提取
+        domain_keywords = self._extract_domain_keywords(query)
+
+        # FTS5 检索 (关键词流 — 用领域词精确匹配)
+        # 领域关键词命中时，FTS 结果权重提升（关键词精确匹配 > 语义模糊匹配）
         fts_indicators = []
         fts_scenarios = []
+        fts_boost = 2.0 if domain_keywords else 1.0
         if use_fts:
             methods.append("fts")
-            fts_indicators = [{"data": r, "score": 1.0 / (i + 1)} for i, r in enumerate(
-                self.fts_search(query, "indicators", top_k)
+            fts_query = self._prepare_fts_query(query, domain_keywords)
+            fts_indicators = [{"data": r, "score": fts_boost / (i + 1)} for i, r in enumerate(
+                self.fts_search(fts_query, "indicators", top_k)
             )]
-            fts_scenarios = [{"data": r, "score": 1.0 / (i + 1)} for i, r in enumerate(
-                self.fts_search(query, "scenarios", 3)
+            fts_scenarios = [{"data": r, "score": fts_boost / (i + 1)} for i, r in enumerate(
+                self.fts_search(fts_query, "scenarios", 3)
             )]
 
-        # 向量检索
+        # 向量检索 (语义流 — 用完整原始 query，保留语义信息)
         vec_indicators = []
         vec_scenarios = []
         if use_vector:
@@ -498,6 +612,7 @@ class IndustryRetriever:
             "scenarios": [r["data"] for r in scn_results[:3]],
             "query": query,
             "method": "+".join(methods) if methods else "basic",
+            "keywords": domain_keywords,
             "scores": {
                 "indicators": [(r["data"].get("code"), r.get("score", 0)) for r in ind_results[:top_k]],
                 "scenarios": [(r["data"].get("code"), r.get("score", 0)) for r in scn_results[:3]]
@@ -570,7 +685,7 @@ if __name__ == "__main__":
     print("=" * 60)
 
     # 初始化
-    store = IndustryStore("ecommerce")
+    store = IndustryStore("fmcg")
     retriever = IndustryRetriever(store)
 
     # 测试 FTS5

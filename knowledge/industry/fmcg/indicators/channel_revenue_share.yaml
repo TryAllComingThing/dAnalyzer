@@ -1,0 +1,22 @@
+# 渠道收入占比
+
+code: channel_revenue_share
+name: 渠道收入占比
+industry: fmcg
+
+keywords:
+  - 渠道占比
+  - 渠道收入
+  - 各渠道
+  - 渠道贡献
+
+description: 各渠道销售额占总销售额的百分比。快消行业渠道包括经销商、直营、电商、KA卖场、便利店、社区团购等。
+
+definition:
+  formula: SUM(sales_amount BY channel) / SUM(sales_amount) * 100
+  unit: "%"
+  precision: 2
+
+stats:
+  importance: 0.83
+  updated: 2026-05-01

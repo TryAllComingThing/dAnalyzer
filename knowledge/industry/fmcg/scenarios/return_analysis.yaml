@@ -1,0 +1,39 @@
+# 退货分析
+
+code: return_analysis
+name: 退货分析
+industry: fmcg
+
+keywords:
+  - 退货
+  - 退款
+  - 退换
+  - 退单
+  - 售后
+
+description: |
+  退货退款深度分析，包含:
+  - 退货率趋势及对比
+  - 退货原因分布（质量问题/描述不符/配送损坏/无理由）
+  - 各品类/SKU退货率排名
+  - 退货金额损失统计
+  - 退货对利润的影响
+
+content:
+  required:
+    - return_rate
+    - sales_amount
+    - order_count
+  optional:
+    - order_cancel_rate
+    - product_defect_rate
+  dimensions:
+    品类: [各品类]
+    退货原因: [质量问题, 描述不符, 配送损坏, 无理由, 其他]
+    渠道: [各渠道]
+    时间: [周, 月, 季度]
+
+stats:
+  usage_count: 0
+  satisfaction: 0.80
+  updated: 2026-05-01

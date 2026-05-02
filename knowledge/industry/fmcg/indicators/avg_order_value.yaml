@@ -1,0 +1,23 @@
+# 客单价
+
+code: avg_order_value
+name: 客单价
+industry: fmcg
+
+keywords:
+  - 客单价
+  - 笔单价
+  - 单均金额
+  - AOV
+  - 每单金额
+
+description: 平均每笔订单的销售金额，衡量消费者的单次消费能力。快消行业核心指标之一。
+
+definition:
+  formula: SUM(sales_amount) / COUNT(DISTINCT order_id)
+  unit: 元
+  precision: 2
+
+stats:
+  importance: 0.90
+  updated: 2026-05-01
