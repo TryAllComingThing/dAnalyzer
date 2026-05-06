@@ -17,10 +17,10 @@
     "./commands/"
   ],
   "skills": [
-    "./skills/"
+    "./skills/",
+    "./skills/danalyzer-core/SKILL.md"
   ],
   "agents": [
-    "./agents/danalyzer.md",
-    "./agents/error-handler.md"
+    "./agents/danalyzer.md"
   ]
 }

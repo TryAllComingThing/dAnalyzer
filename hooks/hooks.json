@@ -1,0 +1,41 @@
+{
+  "description": "dAnalyzer hooks: session routing injection, learning system, security checks",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/kyle/Documents/dAnalyzer/hooks/session-start"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/kyle/Documents/dAnalyzer/hooks/session-end"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/kyle/Documents/dAnalyzer/hooks/post-skill-check"
+          },
+          {
+            "type": "command",
+            "command": "/Users/kyle/Documents/dAnalyzer/hooks/post-tool-use"
+          }
+        ]
+      }
+    ]
+  }
+}

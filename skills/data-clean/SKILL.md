@@ -1,20 +1,39 @@
 ---
 name: data-clean
-description: 数据预处理技能，覆盖数据清洗和数据质量校验。处理空值、异常值、重复值、格式标准化、连续性检测。支持SQL/内存/文件三种模式，根据数据源自动选择最优处理方式
+description: Use when data has null values, outliers, duplicates, or format inconsistencies that need preprocessing before analysis or modeling. Do NOT use for data querying, statistical analysis, or quality reporting without data modification.
 ---
 
 # 数据清洗技能 (Data Clean)
 
-## When to Activate
+## 概述
 
-- Use this skill when cleaning data after retrieval
-- Use this skill when handling null values or missing data
-- Use this skill when dealing with outliers or abnormal values
-- Use this skill when removing duplicate records
-- Use this skill when standardizing data formats
-- Use this skill when performing data preprocessing
+数据预处理技能，覆盖空值填充、异常值检测、去重、格式标准化和质量校验。根据数据源类型自动选择最优处理模式 — 数据库走 SQL 层、小文件走内存、大文件走分块。清洗完成后可衔接 data-quality-check 进行六维度质量评分。
+
+## 何时使用
+
+- **触发:** 数据从 data-query 获取后需要预处理
+- **触发:** 用户数据含空值、异常值、重复值或格式不一致
+- **触发:** 分析或建模前需要保证上游数据质量
+- **不要用于:** 数据查询（使用 data-query）
+- **不要用于:** 统计分析（使用 data-analysis）
+- **不要用于:** 不修改数据的质量评估（使用 data-quality-check）
+
+---
+
+## 核心步骤
+
+1. **判定处理模式** — 根据数据源类型自动选择：数据库→SQL 层处理，小文件(<10万行)→内存处理，大文件→分块/SQL → 详见「处理模式」
+2. **空值处理** — 数值型均值/中位数填充，字符型"未知"填充，日期型前后填充 → 详见「核心能力 > 1. 空值处理」
+3. **异常值处理** — 3σ/IQR/业务规则检测，分类为数据错误（修正/剔除）、真实极端值（保留标注）、不确定（保留并记录）→ 详见「核心能力 > 2. 异常值处理」
+4. **去重** — 主键去重/完全去重/优先级去重 → 详见「核心能力 > 3. 重复值处理」
+5. **格式标准化** — 日期→YYYY-MM-DD，数值→2位小数，字符→去空格+UTF-8 → 详见「核心能力 > 4. 格式标准化」
+6. **可选质量校验** — 清洗完成后按需触发 data-quality-check → 详见「质量校验」
+
+---
 
 ## 处理模式
+
+> 对应 核心步骤 第 1 步
 
 根据数据源类型自动选择最优处理模式：
 
@@ -69,16 +88,11 @@ SELECT * FROM cleaned WHERE rn = 1
 3. 返回清洗后的 DataFrame
 ```
 
-**示例**：
+**示例**（与 SQL 模式相同的清洗逻辑 — 空值填充 → 异常值处理 → 去重）：
 ```python
-# 空值填充
 df['sales_amount'].fillna(df['sales_amount'].mean(), inplace=True)
-
-# 异常值处理 (3σ原则)
 mean, std = df['sales_amount'].mean(), df['sales_amount'].std()
 df = df[(df['sales_amount'] > mean - 3*std) & (df['sales_amount'] < mean + 3*std)]
-
-# 去重
 df.drop_duplicates(subset=['order_id'], keep='last', inplace=True)
 ```
 
@@ -96,6 +110,8 @@ df.drop_duplicates(subset=['order_id'], keep='last', inplace=True)
 
 ### 1. 空值处理
 
+> 对应 核心步骤 第 2 步
+
 | 字段类型 | 处理策略 |
 |----------|----------|
 | 数值型 | 均值/中位数填充 |
@@ -105,6 +121,8 @@ df.drop_duplicates(subset=['order_id'], keep='last', inplace=True)
 
 ### 2. 异常值处理
 
+> 对应 核心步骤 第 3 步
+
 | 检测方法 | 处理方式 |
 |----------|----------|
 | 3σ原则 | 标记或剔除超出±3σ的值 |
@@ -113,6 +131,8 @@ df.drop_duplicates(subset=['order_id'], keep='last', inplace=True)
 
 ### 3. 重复值处理
 
+> 对应 核心步骤 第 4 步
+
 | 去重策略 | 说明 |
 |----------|------|
 | 主键去重 | 按主键去重，保留最新 |
@@ -120,6 +140,8 @@ df.drop_duplicates(subset=['order_id'], keep='last', inplace=True)
 | 优先级去重 | 按某字段优先级保留 |
 
 ### 4. 格式标准化
+
+> 对应 核心步骤 第 5 步
 
 | 类型 | 标准化 |
 |------|--------|
@@ -178,6 +200,8 @@ df.drop_duplicates(subset=['order_id'], keep='last', inplace=True)
 
 ## 质量校验（可选步骤）
 
+> 对应 核心步骤 第 6 步
+
 清洗完成后，按需执行质量校验。适用于数据源不可靠、涉及关键业务决策、或用户明确要求质量报告的场景。
 
 ### 校验维度
@@ -212,3 +236,44 @@ data-query → 返回数据源信息 → data-clean → 返回清洗后的数据
 3. **可追溯**：每步操作需记录日志
 4. **可回滚**：保留原始数据备份
 5. **内存限制**：内存模式需控制数据量，防止 OOM
+
+### 异常场景处理
+
+清洗过程中可能遇到以下非标准场景，不得静默跳过：
+
+| 异常场景 | 检测方式 | 处理策略 |
+|---------|---------|---------|
+| **列/字段缺失** | 上游输出 columns 与下游预期不匹配 | 缺失关键列（主键/必填字段）→ 中止清洗，报告缺失清单；缺失非关键列 → 跳过该列清洗，标注「部分列未清洗」继续执行 |
+| **编码错误** | 打开文件时 `UnicodeDecodeError` 或字符乱码率 > 5% | 尝试编码检测（chardet）→ UTF-8/BOM → GBK → Latin-1 逐级降级；仍失败则中止，提示用户提供编码信息 |
+| **数据类型不可转换** | 数值列含非数字字符串（如 "N/A"、"-"） | 先扫描异常值占比：< 1% → 转为 NaN 后按空值策略填充；≥ 1% → 保留原始值，标记该列为「未清洗」，警告用户 |
+| **清洗操作回滚失败** | 备份恢复异常（权限不足、磁盘满、备份已损坏） | 禁止继续清洗。中止当前操作，保留原始数据不变，报告「回滚机制失效，原始数据保护中」 |
+| **清洗前后数据量不一致** | 清洗后行数 ≠ 预期（如去重过度、异常值误删超 5%） | 对比清洗前后行数：偏差 > 5% → 暂停，列出各行数变化来源（去重 X 行/剔除异常 Y 行），等待用户确认后继续 |
+| **全列为空值** | 某列空值率 = 100% | 标记该列为「不可用」，从清洗范围中排除，在清洗报告中显式说明 |
+
+**异常处理优先级**：编码错误 > 回滚失败 > 列缺失 > 类型不可转换 > 数据量不一致。高优先级异常触发时立即中止，不继续处理低优先级异常。
+
+---
+
+## 常见借口与纠正
+
+| 借口 | 现实 |
+|--------|---------|
+| "数据看起来挺干净的，跳过清洗吧" | 未检查的脏数据会在分析阶段产生错误结论，且难以追溯根因 |
+| "直接用 Python 处理所有数据" | 数据库数据优先用 SQL 层处理，性能和安全性都更优 |
+| "异常值直接删除就行" | 异常值可能是真实极端事件；先分类再决定处理方式 |
+
+## 红线
+
+- **关键空值率过高:** 关键字段空值率超 5% — 执行前追溯上游数据源问题
+- **主键重复:** 检测到主键重复 — 调查源端采集问题，不可仅去重了事
+- **SQL 含写操作:** SQL 模式生成的语句包含写操作 — 立即拒绝
+- **内存溢出风险:** 内存模式数据量超可用 RAM — 强制切换分块或 SQL 模式
+
+## 验证
+
+1. 验证处理模式：确认模式选择（SQL/内存/分块）匹配数据源类型
+2. 验证空值/异常/重复已处理：确认各类别按定义策略执行
+3. 验证清洗统计已记录：确认填充数、剔除数、去重数已记录
+4. 验证 SQL 安全性：确认生成的清洗 SQL 通过安全关键字检查
+5. 验证格式标准化：确认日期使用 YYYY-MM-DD、数值保留 2 位小数、字符串为 UTF-8
+6. 验证可回滚：确认原始数据在清洗前已备份

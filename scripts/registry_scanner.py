@@ -11,6 +11,10 @@
     # 输出 LLM 上下文卡片（精简版，注入 Step 2.5 prompt）
     python scripts/registry_scanner.py --format context-card
 
+    # 按行业过滤（仅输出指定行业）
+    python scripts/registry_scanner.py --industry fmcg
+    python scripts/registry_scanner.py --format context-card --industry manufacturing
+
     # 输出行业列表
     python scripts/registry_scanner.py --industries-only
 
@@ -241,11 +245,27 @@ def main():
                         default="json", help="输出格式")
     parser.add_argument("--industries-only", action="store_true",
                         help="仅输出行业列表")
+    parser.add_argument("--industry", help="仅输出指定行业（按 industry code 过滤）")
     parser.add_argument("--output", "-o", help="输出到文件")
 
     args = parser.parse_args()
 
     registry = build_registry(args.data_root, args.model_root)
+
+    # --industry 过滤：仅保留指定行业
+    if args.industry:
+        industry_code = args.industry
+        all_industries = registry.get("industries", {})
+        if industry_code not in all_industries:
+            available = ", ".join(sorted(all_industries.keys())) or "(无)"
+            print(
+                f"[RegistryScanner] Warning: 行业 '{industry_code}' 不存在，"
+                f"可用行业: {available}",
+                file=sys.stderr,
+            )
+            registry["industries"] = {}
+        else:
+            registry["industries"] = {industry_code: all_industries[industry_code]}
 
     if args.industries_only:
         output = {

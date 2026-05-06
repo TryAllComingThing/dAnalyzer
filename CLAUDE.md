@@ -5,7 +5,7 @@
 > 设计理念: 按需加载 + 自主决策 + 行业适配 + Skill 规则优先
 > 用途: **架构参考文档（仅供人工查阅，不注入运行时上下文）**
 
-**运行时路由决策以 `hooks/routing-table.md`（SessionStart 注入）为准。运行时执行决策以 `skills/danalyzer-core/SKILL.md` 为准。**
+**运行时路由决策以 `hooks/session-routing.md`（SessionStart 注入）为准。运行时执行决策以 `skills/danalyzer-core/SKILL.md` 为准。**
 
 ---
 
